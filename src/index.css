@@ -143,4 +143,8 @@ All colors MUST be HSL for proper theming.
   .animate-marquee:hover {
     animation-play-state: paused;
   }
+  
+  .hover\\:pause:hover {
+    animation-play-state: paused;
+  }
 }
