@@ -1,12 +1,12 @@
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import DesignShowcase from "@/components/DesignShowcase";
+import Homepage from "@/components/Homepage";
 
 const Index = () => {
   return (
     <>
       <Header />
-      <DesignShowcase />
+      <Homepage />
       <Footer />
     </>
   );
