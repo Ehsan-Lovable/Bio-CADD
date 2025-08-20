@@ -9,6 +9,10 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { LoadingState } from '@/components/LoadingState';
+import { SEOHead } from '@/components/SEOHead';
+import { useAnalytics } from '@/lib/analytics';
+import { useEffect } from 'react';
 import { 
   ArrowLeft, 
   Play, 
@@ -26,41 +30,14 @@ import {
 import { toast } from 'sonner';
 
 const CourseDetailSkeleton = () => (
-  <div className="max-w-6xl mx-auto px-6 py-8">
-    <Skeleton className="h-8 w-32 mb-6" />
-    <div className="grid lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2">
-        <Skeleton className="aspect-video w-full mb-6" />
-        <Skeleton className="h-10 w-3/4 mb-4" />
-        <Skeleton className="h-6 w-full mb-2" />
-        <Skeleton className="h-6 w-2/3 mb-8" />
-        
-        <div className="space-y-4">
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-        </div>
-      </div>
-      <div className="lg:col-span-1">
-        <Card className="p-6">
-          <Skeleton className="h-8 w-32 mb-4" />
-          <Skeleton className="h-12 w-full mb-4" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
-        </Card>
-      </div>
-    </div>
-  </div>
+  <LoadingState type="page" className="max-w-6xl mx-auto" />
 );
 
 const CourseDetail = () => {
   const { slug } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { trackCourseView, trackCourseEnrollment } = useAnalytics();
 
   const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ['course-detail', slug],
@@ -111,6 +88,13 @@ const CourseDetail = () => {
     enabled: !!user?.id && !!course?.id
   });
 
+  // Track course view
+  useEffect(() => {
+    if (course) {
+      trackCourseView(course.id, course.title);
+    }
+  }, [course, trackCourseView]);
+
   const handleEnroll = async () => {
     if (!user) {
       navigate('/auth');
@@ -131,6 +115,8 @@ const CourseDetail = () => {
 
       if (error) throw error;
 
+      // Track enrollment
+      trackCourseEnrollment(course.id, course.title, finalPrice);
       toast.success('Successfully enrolled in the course!');
       // Refetch enrollment data
       window.location.reload();
@@ -174,6 +160,22 @@ const CourseDetail = () => {
 
   return (
     <>
+      <SEOHead 
+        title={course.title}
+        description={course.description || `Learn ${course.title} with expert instruction and hands-on projects.`}
+        image={course.poster_url}
+        type="course"
+        course={{
+          id: course.id,
+          title: course.title,
+          description: course.description || undefined,
+          duration: course.duration_text || undefined,
+          level: course.difficulty || undefined,
+          price: finalPrice || undefined,
+          currency: 'BDT'
+        }}
+        tags={Array.isArray(course.topics) ? course.topics : []}
+      />
       <Header />
       <main className="min-h-screen bg-background">
         <div className="max-w-6xl mx-auto px-6 py-8">

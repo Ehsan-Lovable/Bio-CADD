@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Search } from "lucide-react";
+import { Search, BookOpen, User, Home, MessageSquare, Briefcase, FileText, Settings } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -10,10 +10,29 @@ import {
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export function SearchCommand() {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
+  const { user, userProfile } = useAuth();
+
+  // Fetch courses for search
+  const { data: courses } = useQuery({
+    queryKey: ['search-courses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('id, title, slug, course_type')
+        .eq('status', 'published')
+        .order('title');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -32,6 +51,20 @@ export function SearchCommand() {
     navigate(path);
   };
 
+  const pages = [
+    { name: "Home", path: "/", icon: Home },
+    { name: "All Courses", path: "/courses", icon: BookOpen },
+    { name: "Blog", path: "/blog", icon: FileText },
+    { name: "Contact", path: "/contact", icon: MessageSquare },
+    { name: "Career", path: "/career", icon: Briefcase },
+    ...(user ? [
+      { name: "Dashboard", path: "/dashboard", icon: User },
+    ] : []),
+    ...(userProfile?.role === 'admin' ? [
+      { name: "Admin Panel", path: "/admin", icon: Settings },
+    ] : []),
+  ];
+
   return (
     <>
       <Button
@@ -46,29 +79,40 @@ export function SearchCommand() {
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Search pages..." />
+        <CommandInput placeholder="Search pages and courses..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
+          
           <CommandGroup heading="Pages">
-            <CommandItem onSelect={() => handleSelect("/")}>
-              Home
-            </CommandItem>
-            <CommandItem onSelect={() => handleSelect("/courses")}>
-              Courses
-            </CommandItem>
-            <CommandItem onSelect={() => handleSelect("/blog")}>
-              Blog
-            </CommandItem>
-            <CommandItem onSelect={() => handleSelect("/contact")}>
-              Contact
-            </CommandItem>
-            <CommandItem onSelect={() => handleSelect("/career")}>
-              Career
-            </CommandItem>
-            <CommandItem onSelect={() => handleSelect("/dashboard")}>
-              Dashboard
-            </CommandItem>
+            {pages.map((page) => (
+              <CommandItem key={page.path} onSelect={() => handleSelect(page.path)}>
+                <page.icon className="mr-2 h-4 w-4" />
+                {page.name}
+              </CommandItem>
+            ))}
           </CommandGroup>
+
+          {courses && courses.length > 0 && (
+            <CommandGroup heading="Courses">
+              {courses.slice(0, 8).map((course) => (
+                <CommandItem key={course.id} onSelect={() => handleSelect(`/courses/${course.slug}`)}>
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  <div className="flex flex-col">
+                    <span>{course.title}</span>
+                    <span className="text-xs text-muted-foreground capitalize">
+                      {course.course_type || 'Course'}
+                    </span>
+                  </div>
+                </CommandItem>
+              ))}
+              {courses.length > 8 && (
+                <CommandItem onSelect={() => handleSelect('/courses')}>
+                  <Search className="mr-2 h-4 w-4" />
+                  View all {courses.length} courses...
+                </CommandItem>
+              )}
+            </CommandGroup>
+          )}
         </CommandList>
       </CommandDialog>
     </>
