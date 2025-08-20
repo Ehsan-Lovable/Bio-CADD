@@ -18,7 +18,37 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'heading': ['Inter', 'system-ui', 'sans-serif'],
+				'body': ['Inter', 'system-ui', 'sans-serif'],
+			},
+			letterSpacing: {
+				'tight': '-0.025em',
+			},
 			colors: {
+				/* Mustard palette */
+				mustard: {
+					50: 'hsl(var(--mustard-50))',
+					100: 'hsl(var(--mustard-100))',
+					200: 'hsl(var(--mustard-200))',
+					300: 'hsl(var(--mustard-300))',
+					400: 'hsl(var(--mustard-400))',
+					500: 'hsl(var(--mustard-500))',
+					600: 'hsl(var(--mustard-600))',
+					700: 'hsl(var(--mustard-700))',
+					800: 'hsl(var(--mustard-800))',
+					900: 'hsl(var(--mustard-900))',
+				},
+				/* Core blacks */
+				'true-black': 'hsl(var(--true-black))',
+				'off-black': 'hsl(var(--off-black))',
+				'near-white': 'hsl(var(--near-white))',
+				'cream': 'hsl(var(--cream))',
+				/* Accent colors */
+				success: 'hsl(var(--success))',
+				danger: 'hsl(var(--danger))',
+				info: 'hsl(var(--info))',
+				/* Semantic tokens */
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -62,6 +92,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			boxShadow: {
+				'soft': 'var(--shadow-soft)',
+				'mustard': 'var(--shadow-mustard)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
