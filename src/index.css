@@ -28,8 +28,10 @@ All colors MUST be HSL for proper theming.
 
     /* Accent colors */
     --success: 142 71% 45%; /* #22C55E */
+    --warning: 45 93% 47%; /* #F59E0B */
     --danger: 0 84% 60%; /* #EF4444 */
     --info: 221 83% 53%; /* #3B82F6 */
+    --mustard: var(--mustard-500);
 
     /* Semantic tokens */
     --background: var(--near-white);

@@ -5,6 +5,7 @@ interface StatCardProps {
   icon: LucideIcon;
   value: string | number;
   label: string;
+  borderColor?: string;
   change?: {
     value: number;
     period: string;
@@ -13,9 +14,9 @@ interface StatCardProps {
   className?: string;
 }
 
-export const StatCard = ({ icon: Icon, value, label, change, className }: StatCardProps) => {
+export const StatCard = ({ icon: Icon, value, label, borderColor, change, className }: StatCardProps) => {
   return (
-    <Card className={`p-6 border-t-4 border-t-primary bg-background ${className || ''}`}>
+    <Card className={`p-6 border-t-4 ${borderColor || 'border-t-primary'} bg-background ${className || ''}`}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-2xl font-bold text-foreground">{value}</p>
