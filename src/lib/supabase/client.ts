@@ -24,8 +24,13 @@ export async function getCurrentSession() {
 }
 
 export async function getUserProfile(userId: string) {
-  // TODO: Implement when profiles table is created
-  return { data: null, error: null };
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  
+  return { data, error };
 }
 
 export async function signOut() {

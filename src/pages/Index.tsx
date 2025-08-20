@@ -1,7 +1,13 @@
+import { Header } from '@/components/Header';
 import DesignShowcase from "@/components/DesignShowcase";
 
 const Index = () => {
-  return <DesignShowcase />;
+  return (
+    <>
+      <Header />
+      <DesignShowcase />
+    </>
+  );
 };
 
 export default Index;

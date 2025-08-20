@@ -29,9 +29,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // TODO: Fetch user profile when profiles table is created
+        // Fetch user profile when signed in
         if (session?.user) {
-          setUserProfile({ role: 'user' }); // Default role
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          setUserProfile(profile);
         } else {
           setUserProfile(null);
         }

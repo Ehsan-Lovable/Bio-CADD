@@ -76,6 +76,42 @@ This project is built with:
 - Tailwind CSS
 - Supabase (Database, Auth, Storage)
 
+## Admin Setup
+
+To set up an admin user, follow these steps:
+
+1. **Create a user account** through the sign-up flow
+2. **Update the user's role** in the database using one of these methods:
+
+### Option A: Using Supabase Dashboard
+1. Go to your [Supabase Dashboard](https://supabase.com/dashboard)
+2. Navigate to your project → Table Editor → `profiles`
+3. Find your user row and edit the `role` column to `admin`
+
+### Option B: Using SQL in Supabase SQL Editor
+```sql
+-- Replace 'your-email@example.com' with your actual email
+UPDATE profiles 
+SET role = 'admin' 
+WHERE email = 'your-email@example.com';
+```
+
+### Option C: Using CLI (if using local development)
+```bash
+# Run this SQL command in your local database
+psql -d your_database -c "UPDATE profiles SET role = 'admin' WHERE email = 'your-email@example.com';"
+```
+
+After updating your role to `admin`, you'll have access to the admin panel at `/admin`.
+
+## Authentication Setup
+
+For authentication to work properly in production, make sure to:
+
+1. Set the correct **Site URL** in Supabase Auth settings
+2. Add your domain to **Redirect URLs** in Supabase Auth settings
+3. Optionally disable "Confirm email" for faster testing (not recommended for production)
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/75c20c22-35cb-443c-b722-24e72d40fde0) and click on Share -> Publish.
