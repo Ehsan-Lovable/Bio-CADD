@@ -3,6 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Clock, Award, Users, Play, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEnrollment } from '@/hooks/useEnrollment';
+import { useGatedContent } from '@/hooks/useGatedContent';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CourseCardProps {
   course: {
@@ -23,6 +26,16 @@ interface CourseCardProps {
 }
 
 export const CourseCard = ({ course, className }: CourseCardProps) => {
+  const { session } = useAuth();
+  const { enroll, isEnrolling } = useEnrollment();
+  const { isEnrolled, canViewContent } = useGatedContent(course.id);
+
+  const handleEnroll = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await enroll(course.id);
+  };
+
   return (
     <Card className={`group overflow-hidden hover:shadow-mustard transition-all duration-300 ${className || ''}`}>
       <Link to={`/courses/${course.slug}`}>
@@ -54,8 +67,10 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
             <Play className="h-12 w-12 text-white" />
           </div>
         </div>
-        
-        <div className="p-6">
+      </Link>
+      
+      <div className="p-6">
+        <Link to={`/courses/${course.slug}`}>
           <div className="flex items-start justify-between mb-2">
             <h3 className="font-heading font-semibold text-lg group-hover:text-primary transition-colors line-clamp-2">
               {course.title}
@@ -94,33 +109,45 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
               </span>
             )}
           </div>
+        </Link>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            {course.price_regular && (
+              <div className="flex items-center gap-2">
+                {course.price_offer && course.price_offer < course.price_regular ? (
+                  <>
+                    <span className="font-bold text-lg text-primary">৳{course.price_offer}</span>
+                    <span className="text-sm text-muted-foreground line-through">৳{course.price_regular}</span>
+                  </>
+                ) : (
+                  <span className="font-bold text-lg text-primary">৳{course.price_regular}</span>
+                )}
+              </div>
+            )}
+            {!course.price_regular && (
+              <span className="font-bold text-lg text-primary">Free</span>
+            )}
+          </div>
           
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              {course.price_regular && (
-                <div className="flex items-center gap-2">
-                  {course.price_offer && course.price_offer < course.price_regular ? (
-                    <>
-                      <span className="font-bold text-lg text-primary">৳{course.price_offer}</span>
-                      <span className="text-sm text-muted-foreground line-through">৳{course.price_regular}</span>
-                    </>
-                  ) : (
-                    <span className="font-bold text-lg text-primary">৳{course.price_regular}</span>
-                  )}
-                </div>
-              )}
-              {!course.price_regular && (
-                <span className="font-bold text-lg text-primary">Free</span>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Users className="h-3 w-3" />
-              <span>Available</span>
-            </div>
+          <div className="flex items-center gap-2">
+            {isEnrolled ? (
+              <Badge variant="default" className="bg-success text-white">
+                Enrolled
+              </Badge>
+            ) : (
+              <Button 
+                size="sm" 
+                onClick={handleEnroll}
+                disabled={isEnrolling}
+                className="ml-2"
+              >
+                {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
+              </Button>
+            )}
           </div>
         </div>
-      </Link>
+      </div>
     </Card>
   );
 };

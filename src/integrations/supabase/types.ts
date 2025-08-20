@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      career_applications: {
+        Row: {
+          cover_letter: string | null
+          created_at: string
+          email: string
+          experience: string | null
+          id: string
+          name: string
+          phone: string | null
+          position: string
+          resume_url: string | null
+        }
+        Insert: {
+          cover_letter?: string | null
+          created_at?: string
+          email: string
+          experience?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          position: string
+          resume_url?: string | null
+        }
+        Update: {
+          cover_letter?: string | null
+          created_at?: string
+          email?: string
+          experience?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          position?: string
+          resume_url?: string | null
+        }
+        Relationships: []
+      }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           audience: string | null
