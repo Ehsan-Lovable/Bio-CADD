@@ -50,6 +50,21 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+
+# Optional: Service role key for server-side operations (keep secure)
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+**Important**: Never commit your `.env` file or expose service role keys in client-side code.
+
 ## What technologies are used for this project?
 
 This project is built with:
@@ -59,6 +74,7 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Database, Auth, Storage)
 
 ## How can I deploy this project?
 
