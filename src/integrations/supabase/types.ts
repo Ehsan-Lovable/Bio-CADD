@@ -14,7 +14,323 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      courses: {
+        Row: {
+          audience: string | null
+          certificate: boolean | null
+          course_type: Database["public"]["Enums"]["course_type"]
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          difficulty: string | null
+          duration_text: string | null
+          id: string
+          language: string | null
+          module_count: number | null
+          poster_url: string | null
+          price_offer: number | null
+          price_regular: number | null
+          roadmap: Json | null
+          seats_text: string | null
+          slug: string
+          start_date: string | null
+          status: Database["public"]["Enums"]["course_status"]
+          time_24h: string | null
+          title: string
+          topics: string[] | null
+          updated_at: string | null
+          whats_included: string[] | null
+          why_join: Json | null
+        }
+        Insert: {
+          audience?: string | null
+          certificate?: boolean | null
+          course_type: Database["public"]["Enums"]["course_type"]
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration_text?: string | null
+          id?: string
+          language?: string | null
+          module_count?: number | null
+          poster_url?: string | null
+          price_offer?: number | null
+          price_regular?: number | null
+          roadmap?: Json | null
+          seats_text?: string | null
+          slug: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["course_status"]
+          time_24h?: string | null
+          title: string
+          topics?: string[] | null
+          updated_at?: string | null
+          whats_included?: string[] | null
+          why_join?: Json | null
+        }
+        Update: {
+          audience?: string | null
+          certificate?: boolean | null
+          course_type?: Database["public"]["Enums"]["course_type"]
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration_text?: string | null
+          id?: string
+          language?: string | null
+          module_count?: number | null
+          poster_url?: string | null
+          price_offer?: number | null
+          price_regular?: number | null
+          roadmap?: Json | null
+          seats_text?: string | null
+          slug?: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["course_status"]
+          time_24h?: string | null
+          title?: string
+          topics?: string[] | null
+          updated_at?: string | null
+          whats_included?: string[] | null
+          why_join?: Json | null
+        }
+        Relationships: []
+      }
+      dft_submissions: {
+        Row: {
+          course_id: string | null
+          created_at: string | null
+          id: string
+          link: string | null
+          notes: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          link?: string | null
+          notes?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          link?: string | null
+          notes?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dft_submissions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enrollments: {
+        Row: {
+          course_id: string
+          created_at: string | null
+          id: string
+          payment_status: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string | null
+          id?: string
+          payment_status?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          payment_status?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          course_id: string
+          duration_minutes: number | null
+          id: string
+          is_preview: boolean | null
+          order: number | null
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          course_id: string
+          duration_minutes?: number | null
+          id?: string
+          is_preview?: boolean | null
+          order?: number | null
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          course_id?: string
+          duration_minutes?: number | null
+          id?: string
+          is_preview?: boolean | null
+          order?: number | null
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          course_id: string | null
+          id: string
+          order: number | null
+          resource_type: string | null
+          title: string
+          url: string
+        }
+        Insert: {
+          course_id?: string | null
+          id?: string
+          order?: number | null
+          resource_type?: string | null
+          title: string
+          url: string
+        }
+        Update: {
+          course_id?: string | null
+          id?: string
+          order?: number | null
+          resource_type?: string | null
+          title?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_settings: {
+        Row: {
+          hero_cta_label: string | null
+          hero_headline: string | null
+          hero_subtitle: string | null
+          id: number
+          metrics: Json | null
+          partners: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          hero_cta_label?: string | null
+          hero_headline?: string | null
+          hero_subtitle?: string | null
+          id?: number
+          metrics?: Json | null
+          partners?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          hero_cta_label?: string | null
+          hero_headline?: string | null
+          hero_subtitle?: string | null
+          id?: number
+          metrics?: Json | null
+          partners?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          author_name: string | null
+          author_role: string | null
+          avatar_url: string | null
+          content: string
+          id: string
+          order: number | null
+          rating: number | null
+        }
+        Insert: {
+          author_name?: string | null
+          author_role?: string | null
+          avatar_url?: string | null
+          content: string
+          id?: string
+          order?: number | null
+          rating?: number | null
+        }
+        Update: {
+          author_name?: string | null
+          author_role?: string | null
+          avatar_url?: string | null
+          content?: string
+          id?: string
+          order?: number | null
+          rating?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +339,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      course_status: "draft" | "published" | "archived"
+      course_type: "live" | "recorded" | "workshop"
+      user_role: "student" | "instructor" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +468,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      course_status: ["draft", "published", "archived"],
+      course_type: ["live", "recorded", "workshop"],
+      user_role: ["student", "instructor", "admin"],
+    },
   },
 } as const
