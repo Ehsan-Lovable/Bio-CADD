@@ -56,7 +56,7 @@ const AdminCoursesIndex = () => {
   });
 
   const toggleStatusMutation = useMutation({
-    mutationFn: async ({ courseId, newStatus }: { courseId: string; newStatus: string }) => {
+    mutationFn: async ({ courseId, newStatus }: { courseId: string; newStatus: 'draft' | 'published' | 'archived' }) => {
       const { error } = await supabase
         .from('courses')
         .update({ status: newStatus })
@@ -197,7 +197,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
     description: '',
     language: 'bn',
     poster_url: '',
-    course_type: '',
+    course_type: '' as 'live' | 'recorded' | 'workshop' | '',
     start_date: '',
     time_24h: '',
     duration_text: '',
@@ -212,7 +212,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
     audience: '',
     difficulty: '',
     module_count: '',
-    status: 'draft'
+    status: 'draft' as 'draft' | 'published' | 'archived'
   });
 
   // Load course data for editing
@@ -260,13 +260,13 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
   });
 
   const saveMutation = useMutation({
-    mutationFn: async (publishAfterSave = false) => {
+    mutationFn: async (publishAfterSave?: boolean) => {
       const courseData = {
         ...formData,
         price_regular: formData.price_regular ? parseFloat(formData.price_regular) : null,
         price_offer: formData.price_offer ? parseFloat(formData.price_offer) : null,
         module_count: formData.module_count ? parseInt(formData.module_count) : null,
-        status: publishAfterSave ? 'published' : formData.status,
+        status: publishAfterSave ? ('published' as const) : formData.status,
         course_type: formData.course_type || null
       };
 
@@ -332,7 +332,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
 
   const handleSave = () => {
     if (!validateForm()) return;
-    saveMutation.mutate();
+    saveMutation.mutate(false);
   };
 
   const handlePublish = () => {
@@ -456,7 +456,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
                 <Label htmlFor="course_type">Course Type</Label>
                 <Select
                   value={formData.course_type}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, course_type: value }))}
+                  onValueChange={(value: 'live' | 'recorded' | 'workshop') => setFormData(prev => ({ ...prev, course_type: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
@@ -631,7 +631,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
                 <Label htmlFor="status">Status</Label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+                  onValueChange={(value: 'draft' | 'published' | 'archived') => setFormData(prev => ({ ...prev, status: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
