@@ -10,6 +10,12 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import Courses from "./pages/Courses";
+import Blog from "./pages/Blog";
+import Contact from "./pages/Contact";
+import Career from "./pages/Career";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +29,12 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/career" element={<Career />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             <Route 
               path="/dashboard" 
               element={

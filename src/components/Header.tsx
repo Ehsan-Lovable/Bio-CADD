@@ -3,12 +3,24 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { signOut } from '@/lib/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { User, Settings, LogOut, Shield } from 'lucide-react';
+import { SearchCommand } from '@/components/SearchCommand';
+import { useIsMobile } from '@/hooks/use-mobile';
+
+const navLinks = [
+  { name: 'Home', path: '/' },
+  { name: 'Courses', path: '/courses' },
+  { name: 'Blog', path: '/blog' },
+  { name: 'Contact', path: '/contact' },
+  { name: 'Career', path: '/career' },
+];
 
 export function Header() {
   const { user, userProfile, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
     await signOut();
@@ -25,7 +37,7 @@ export function Header() {
 
   if (loading) {
     return (
-      <header className="border-b bg-background">
+      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-bold text-primary">Course Website</h1>
@@ -39,17 +51,45 @@ export function Header() {
   }
 
   return (
-    <header className="border-b bg-background">
+    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-          <h1 
-            className="text-xl font-bold text-primary cursor-pointer"
-            onClick={() => navigate('/')}
+          {/* Logo */}
+          <Link 
+            to="/"
+            className="text-xl font-bold text-primary hover:text-primary/80 transition-colors"
           >
             Course Website
-          </h1>
+          </Link>
 
+          {/* Navigation Links - Hidden on mobile */}
+          {!isMobile && (
+            <nav className="hidden md:flex items-center space-x-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`relative text-sm font-medium transition-colors hover:text-primary ${
+                    location.pathname === link.path
+                      ? 'text-primary'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  {link.name}
+                  {location.pathname === link.path && (
+                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary rounded-full" />
+                  )}
+                </Link>
+              ))}
+            </nav>
+          )}
+
+          {/* Right Section */}
           <div className="flex items-center gap-4">
+            {/* Search */}
+            <SearchCommand />
+
+            {/* Auth Section */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

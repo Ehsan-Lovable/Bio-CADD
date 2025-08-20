@@ -1,4 +1,5 @@
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import DesignShowcase from "@/components/DesignShowcase";
 
 const Index = () => {
@@ -6,6 +7,7 @@ const Index = () => {
     <>
       <Header />
       <DesignShowcase />
+      <Footer />
     </>
   );
 };
