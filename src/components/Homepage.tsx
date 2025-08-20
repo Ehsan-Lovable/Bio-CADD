@@ -9,75 +9,7 @@ import { TestimonialsMarquee } from '@/components/TestimonialsMarquee';
 import { FeatureGrid } from '@/components/FeatureGrid';
 import { PartnerStrip } from '@/components/PartnerStrip';
 import { CourseCard } from '@/components/CourseCard';
-
-const HeroSection = () => {
-  const { data: siteSettings, isLoading: settingsLoading } = useQuery({
-    queryKey: ['site-settings'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('*')
-        .eq('id', 1)
-        .single();
-      return data;
-    }
-  });
-
-  if (settingsLoading) {
-    return (
-      <section className="relative bg-true-black text-near-white py-20 lg:py-32 px-6 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle, hsl(var(--mustard-500)) 1px, transparent 1px)',
-            backgroundSize: '24px 24px'
-          }} />
-        </div>
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <Skeleton className="h-16 w-3/4 mx-auto mb-6 bg-muted/20" />
-          <Skeleton className="h-8 w-2/3 mx-auto mb-8 bg-muted/20" />
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Skeleton className="h-12 w-40 bg-muted/20" />
-            <Skeleton className="h-12 w-32 bg-muted/20" />
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section className="relative bg-true-black text-near-white py-20 lg:py-32 px-6 overflow-hidden">
-      {/* Dotted grid background */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle, hsl(var(--mustard-500)) 1px, transparent 1px)',
-          backgroundSize: '24px 24px'
-        }} />
-      </div>
-      
-      <div className="max-w-6xl mx-auto text-center relative z-10">
-        <h1 className="font-heading font-bold text-5xl lg:text-7xl tracking-tight mb-6 leading-tight">
-          {siteSettings?.hero_headline || 'Master New Skills with Expert-Led Courses'}
-        </h1>
-        <p className="text-xl lg:text-2xl text-zinc-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-          {siteSettings?.hero_subtitle || 'Join thousands of learners transforming their careers through high-quality, practical courses designed by industry experts.'}
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link to="/courses">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-mustard group">
-              {siteSettings?.hero_cta_label || 'Browse Courses'}
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
-          <Link to="/contact">
-            <Button variant="outline" size="lg" className="border-near-white/20 text-near-white hover:bg-near-white/10">
-              Contact Us
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-};
+import HeroBio from '@/components/HeroBio';
 
 const FeaturedCourses = () => {
   const { data: courses, isLoading } = useQuery({
@@ -165,7 +97,7 @@ const Newsletter = () => {
 const Homepage = () => {
   return (
     <div>
-      <HeroSection />
+      <HeroBio />
       <FeaturedCourses />
       <TestimonialsMarquee />
       <FeatureGrid />
