@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase/browser';
 
 // Portfolio queries
 export const getPublishedPortfolioProjects = async () => {

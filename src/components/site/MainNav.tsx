@@ -60,10 +60,10 @@ export function MainNav({ className }: MainNavProps) {
         'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1',
         mobile 
           ? 'block w-full text-left py-3 px-4 text-base border-b border-border last:border-0'
-          : 'hover:text-foreground',
+          : 'hover:text-foreground transition-colors',
         isActive(link.path)
           ? 'text-foreground font-semibold'
-          : 'text-muted-foreground',
+          : 'text-foreground/70 hover:text-foreground',
         className
       )}
       onClick={mobile ? () => setIsOpen(false) : undefined}
@@ -71,7 +71,7 @@ export function MainNav({ className }: MainNavProps) {
       {link.name}
       {!mobile && isActive(link.path) && (
         <span 
-          className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary rounded-full"
+          className="absolute -bottom-1 left-0 w-full h-0.5 bg-mustard-500 rounded-full transition-opacity"
           aria-hidden="true"
         />
       )}
