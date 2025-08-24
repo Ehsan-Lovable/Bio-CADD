@@ -323,6 +323,136 @@ export type Database = {
           },
         ]
       }
+      portfolio_files: {
+        Row: {
+          filename: string | null
+          id: string
+          order: number | null
+          project_id: string
+          size_bytes: number | null
+          url: string
+        }
+        Insert: {
+          filename?: string | null
+          id?: string
+          order?: number | null
+          project_id: string
+          size_bytes?: number | null
+          url: string
+        }
+        Update: {
+          filename?: string | null
+          id?: string
+          order?: number | null
+          project_id?: string
+          size_bytes?: number | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "portfolio_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portfolio_images: {
+        Row: {
+          alt: string | null
+          id: string
+          is_cover: boolean | null
+          order: number | null
+          project_id: string
+          url: string
+        }
+        Insert: {
+          alt?: string | null
+          id?: string
+          is_cover?: boolean | null
+          order?: number | null
+          project_id: string
+          url: string
+        }
+        Update: {
+          alt?: string | null
+          id?: string
+          is_cover?: boolean | null
+          order?: number | null
+          project_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_images_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "portfolio_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portfolio_projects: {
+        Row: {
+          budget_text: string | null
+          client_name: string | null
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          description_md: string | null
+          duration_text: string | null
+          featured: boolean | null
+          hero_image_url: string | null
+          id: string
+          services: string[] | null
+          slug: string
+          status: Database["public"]["Enums"]["portfolio_status"]
+          summary: string | null
+          technologies: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          budget_text?: string | null
+          client_name?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description_md?: string | null
+          duration_text?: string | null
+          featured?: boolean | null
+          hero_image_url?: string | null
+          id?: string
+          services?: string[] | null
+          slug: string
+          status?: Database["public"]["Enums"]["portfolio_status"]
+          summary?: string | null
+          technologies?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          budget_text?: string | null
+          client_name?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description_md?: string | null
+          duration_text?: string | null
+          featured?: boolean | null
+          hero_image_url?: string | null
+          id?: string
+          services?: string[] | null
+          slug?: string
+          status?: Database["public"]["Enums"]["portfolio_status"]
+          summary?: string | null
+          technologies?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -455,6 +585,7 @@ export type Database = {
     Enums: {
       course_status: "draft" | "published" | "archived"
       course_type: "live" | "recorded" | "workshop"
+      portfolio_status: "draft" | "published" | "archived"
       user_role: "student" | "instructor" | "admin"
     }
     CompositeTypes: {
@@ -585,6 +716,7 @@ export const Constants = {
     Enums: {
       course_status: ["draft", "published", "archived"],
       course_type: ["live", "recorded", "workshop"],
+      portfolio_status: ["draft", "published", "archived"],
       user_role: ["student", "instructor", "admin"],
     },
   },

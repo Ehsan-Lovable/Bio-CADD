@@ -13,13 +13,15 @@ import {
   Settings,
   Upload,
   Menu,
-  X
+  X,
+  Briefcase
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 // Import admin page components
 import AdminDashboard from './admin/AdminDashboard';
 import AdminCourses from './admin/AdminCourses';
+import AdminPortfolio from './admin/AdminPortfolio';
 import AdminLessons from './admin/AdminLessons';
 import AdminResources from './admin/AdminResources';
 import AdminDFTSubmissions from './admin/AdminDFTSubmissions';
@@ -37,6 +39,11 @@ const sidebarItems = [
     name: 'Courses', 
     path: '/admin/courses', 
     icon: BookOpen 
+  },
+  { 
+    name: 'Portfolio', 
+    path: '/admin/portfolio', 
+    icon: Briefcase 
   },
   { 
     name: 'Lessons/Recordings', 
@@ -176,6 +183,7 @@ export default function Admin() {
           <Routes>
             <Route index element={<AdminDashboard />} />
             <Route path="courses/*" element={<AdminCourses />} />
+            <Route path="portfolio/*" element={<AdminPortfolio />} />
             <Route path="lessons/*" element={<AdminLessons />} />
             <Route path="resources/*" element={<AdminResources />} />
             <Route path="submissions" element={<AdminDFTSubmissions />} />
