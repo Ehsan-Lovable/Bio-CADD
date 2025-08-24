@@ -77,12 +77,12 @@ export function PortfolioFilterBar({
       {/* Filters Row */}
       <div className="flex flex-wrap items-center gap-4">
         {/* Country Filter */}
-        <Select value={filters.country} onValueChange={(country) => updateFilters({ country })}>
+        <Select value={filters.country || "all"} onValueChange={(country) => updateFilters({ country: country === "all" ? "" : country })}>
           <SelectTrigger className="w-48">
             <SelectValue placeholder="All countries" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All countries</SelectItem>
+            <SelectItem value="all">All countries</SelectItem>
             {countryOptions.map((country) => (
               <SelectItem key={country} value={country || 'unknown'}>
                 {country || 'Unknown'}
