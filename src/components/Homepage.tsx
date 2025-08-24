@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
+import { getPublishedCourses } from '@/lib/queries';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,17 +12,13 @@ import { CourseCard } from '@/components/CourseCard';
 import HeroBio from '@/components/HeroBio';
 
 const FeaturedCourses = () => {
-  const { data: courses, isLoading } = useQuery({
-    queryKey: ['featured-courses'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('status', 'published')
-        .limit(3);
-      return data || [];
+  const { data: courses, isLoading } = useOptimizedQuery(
+    ['featured-courses'],
+    async () => {
+      const data = await getPublishedCourses();
+      return data.slice(0, 3); // Limit to 3 featured courses
     }
-  });
+  );
 
   if (isLoading) {
     return (

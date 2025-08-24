@@ -84,8 +84,8 @@ export function PortfolioFilterBar({
           <SelectContent>
             <SelectItem value="">All countries</SelectItem>
             {countryOptions.map((country) => (
-              <SelectItem key={country} value={country}>
-                {country}
+              <SelectItem key={country} value={country || 'unknown'}>
+                {country || 'Unknown'}
               </SelectItem>
             ))}
           </SelectContent>
