@@ -174,8 +174,23 @@ export default function AdminPortfolioForm() {
     try {
       setSaving(true);
 
+      // Ensure required fields are present
+      if (!data.title || !data.slug) {
+        throw new Error('Title and slug are required');
+      }
+
       const projectData = {
-        ...data,
+        title: data.title,
+        slug: data.slug,
+        summary: data.summary || '',
+        status: data.status,
+        featured: data.featured,
+        client_name: data.client_name || '',
+        country: data.country || '',
+        duration_text: data.duration_text || '',
+        budget_text: data.budget_text || '',
+        description_md: data.description_md || '',
+        hero_image_url: data.hero_image_url || '',
         services,
         technologies: technologies.map(tech => tech.value),
         updated_at: new Date().toISOString(),
@@ -196,7 +211,7 @@ export default function AdminPortfolioForm() {
       } else {
         const { error } = await supabase
           .from('portfolio_projects')
-          .insert([projectData]);
+          .insert(projectData);
 
         if (error) throw error;
 
