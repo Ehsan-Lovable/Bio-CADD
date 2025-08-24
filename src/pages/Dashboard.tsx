@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatCard } from '@/components/StatCard';
 import { EmptyState } from '@/components/EmptyState';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useOptimizedDashboardData } from '@/hooks/useOptimizedDashboardData';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/supabase/client';
 import { 
@@ -23,7 +23,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const { user, userProfile } = useAuth();
-  const { stats, enrolledCourses, recentActivity, isLoading } = useDashboardData();
+  const { stats, enrolledCourses, recentActivity, isLoading } = useOptimizedDashboardData();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
