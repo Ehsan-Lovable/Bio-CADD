@@ -52,12 +52,12 @@ const FeaturedCourses = () => {
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {courses.map((course) => (
+          {(courses || []).map((course) => (
             <CourseCard key={course.id} course={course} />
           ))}
         </div>
         
-        {courses.length === 0 && (
+        {(!courses || courses.length === 0) && (
           <div className="text-center py-12">
             <p className="text-lg text-muted-foreground">No courses available yet</p>
           </div>
