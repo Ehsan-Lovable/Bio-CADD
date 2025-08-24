@@ -1,0 +1,591 @@
+{
+  "project": {
+    "name": "Professional Learning Platform with Portfolio",
+    "type": "Full-stack React web application",
+    "description": "A comprehensive educational platform with course management, user authentication, admin dashboard, and professional portfolio showcase system"
+  },
+  "tech_stack": {
+    "frontend": {
+      "framework": "React 18.3.1",
+      "build_tool": "Vite",
+      "styling": "Tailwind CSS with shadcn/ui components",
+      "typescript": "Full TypeScript support",
+      "routing": "React Router DOM v6",
+      "state_management": "React Query for server state, React hooks for local state",
+      "ui_library": "shadcn/ui with Radix UI primitives"
+    },
+    "backend": {
+      "database": "Supabase PostgreSQL",
+      "authentication": "Supabase Auth",
+      "storage": "Supabase Storage",
+      "edge_functions": "Supabase Edge Functions",
+      "real_time": "Supabase Realtime subscriptions"
+    }
+  },
+  "environment_variables": {
+    "required": [
+      "VITE_SUPABASE_URL",
+      "VITE_SUPABASE_PUBLISHABLE_KEY"
+    ],
+    "note": "Never use VITE_ prefixed variables in Lovable - use direct project refs instead"
+  },
+  "dependencies": {
+    "ui_components": [
+      "@radix-ui/react-*",
+      "lucide-react",
+      "class-variance-authority",
+      "tailwind-merge",
+      "tailwindcss-animate"
+    ],
+    "forms": [
+      "react-hook-form",
+      "@hookform/resolvers",
+      "zod"
+    ],
+    "data_fetching": [
+      "@tanstack/react-query",
+      "@supabase/supabase-js"
+    ],
+    "utilities": [
+      "date-fns",
+      "clsx",
+      "sonner",
+      "cmdk"
+    ]
+  },
+  "supabase_setup": {
+    "authentication": {
+      "providers": ["email"],
+      "features": ["user_profiles", "role_based_access"]
+    },
+    "storage_buckets": [
+      {
+        "name": "course-posters",
+        "public": true,
+        "description": "Course poster images"
+      },
+      {
+        "name": "avatars", 
+        "public": true,
+        "description": "User profile avatars"
+      },
+      {
+        "name": "documents",
+        "public": false,
+        "description": "Private course resources and documents"
+      },
+      {
+        "name": "portfolio-images",
+        "public": true,
+        "description": "Portfolio project images and galleries"
+      },
+      {
+        "name": "portfolio-files",
+        "public": false,
+        "description": "Downloadable portfolio project files"
+      }
+    ],
+    "edge_functions": [
+      {
+        "name": "contact-form",
+        "description": "Handles contact form submissions"
+      },
+      {
+        "name": "career-form", 
+        "description": "Processes career application submissions"
+      },
+      {
+        "name": "enroll",
+        "description": "Manages course enrollment process"
+      },
+      {
+        "name": "upload-storage",
+        "description": "Handles file uploads to storage buckets"
+      }
+    ],
+    "database_schema": {
+      "enums": [
+        {
+          "name": "user_role",
+          "values": ["student", "admin"]
+        },
+        {
+          "name": "course_status", 
+          "values": ["draft", "published", "archived"]
+        },
+        {
+          "name": "portfolio_status",
+          "values": ["draft", "published", "archived"]
+        }
+      ],
+      "tables": [
+        {
+          "name": "profiles",
+          "description": "Extended user profiles with roles",
+          "key_columns": ["id (uuid)", "full_name", "role", "avatar_url", "phone"]
+        },
+        {
+          "name": "courses",
+          "description": "Course catalog and details",
+          "key_columns": ["id", "title", "slug", "description", "status", "course_type", "price_regular", "price_offer", "start_date", "poster_url", "topics[]", "whats_included[]", "roadmap (jsonb)", "why_join (jsonb)"]
+        },
+        {
+          "name": "lessons",
+          "description": "Individual course lessons",
+          "key_columns": ["id", "course_id", "title", "video_url", "duration_minutes", "order", "is_preview"]
+        },
+        {
+          "name": "enrollments",
+          "description": "User course enrollments",
+          "key_columns": ["id", "user_id", "course_id", "status", "payment_status"]
+        },
+        {
+          "name": "lesson_progress", 
+          "description": "User progress tracking",
+          "key_columns": ["id", "user_id", "course_id", "lesson_id", "completed", "position_seconds", "last_watched_at"]
+        },
+        {
+          "name": "resources",
+          "description": "Course downloadable resources",
+          "key_columns": ["id", "course_id", "title", "url", "resource_type", "order"]
+        },
+        {
+          "name": "portfolio_projects",
+          "description": "Portfolio project showcase",
+          "key_columns": ["id", "slug", "title", "summary", "description_md", "client_name", "country", "duration_text", "budget_text", "hero_image_url", "services[]", "technologies[]", "status", "featured", "created_by"]
+        },
+        {
+          "name": "portfolio_images",
+          "description": "Portfolio project image galleries",
+          "key_columns": ["id", "project_id", "url", "alt", "order", "is_cover"]
+        },
+        {
+          "name": "portfolio_files",
+          "description": "Portfolio project downloadable files",
+          "key_columns": ["id", "project_id", "filename", "url", "size_bytes", "order"]
+        },
+        {
+          "name": "contact_messages",
+          "description": "Contact form submissions",
+          "key_columns": ["id", "name", "email", "subject", "message"]
+        },
+        {
+          "name": "career_applications",
+          "description": "Career application submissions", 
+          "key_columns": ["id", "name", "email", "phone", "position", "experience", "resume_url", "cover_letter"]
+        },
+        {
+          "name": "dft_submissions",
+          "description": "DFT (Design for Testability) submissions",
+          "key_columns": ["id", "user_id", "course_id", "link", "notes", "status"]
+        },
+        {
+          "name": "testimonials",
+          "description": "Customer testimonials",
+          "key_columns": ["id", "author_name", "author_role", "content", "rating", "avatar_url", "order"]
+        },
+        {
+          "name": "site_settings",
+          "description": "Global site configuration",
+          "key_columns": ["id", "hero_headline", "hero_subtitle", "hero_cta_label", "partners (jsonb)", "metrics (jsonb)"]
+        }
+      ],
+      "rls_policies": {
+        "description": "Comprehensive Row Level Security policies",
+        "patterns": [
+          "Admin users can manage all data",
+          "Users can only access their own data", 
+          "Published content is publicly readable",
+          "Contact forms and applications allow public inserts"
+        ]
+      },
+      "functions": [
+        {
+          "name": "get_current_user_role()",
+          "description": "Returns the current user's role for RLS policies"
+        },
+        {
+          "name": "handle_new_user()",
+          "description": "Trigger function to create profile on user signup"
+        },
+        {
+          "name": "update_updated_at_column()",
+          "description": "Trigger function to update timestamps"
+        }
+      ]
+    }
+  },
+  "routing_structure": {
+    "public_routes": [
+      {
+        "path": "/",
+        "component": "Index",
+        "description": "Landing page with hero, features, testimonials"
+      },
+      {
+        "path": "/courses",
+        "component": "Courses", 
+        "description": "Course catalog with filtering and search"
+      },
+      {
+        "path": "/courses/:slug",
+        "component": "CourseDetail",
+        "description": "Individual course details and enrollment"
+      },
+      {
+        "path": "/portfolio",
+        "component": "Portfolio",
+        "description": "Portfolio project showcase with filtering"
+      },
+      {
+        "path": "/portfolio/:slug", 
+        "component": "PortfolioDetail",
+        "description": "Individual portfolio project case study"
+      },
+      {
+        "path": "/contact",
+        "component": "Contact",
+        "description": "Contact form submission"
+      },
+      {
+        "path": "/career",
+        "component": "Career", 
+        "description": "Career opportunities and applications"
+      },
+      {
+        "path": "/auth",
+        "component": "Auth",
+        "description": "Login and registration forms"
+      },
+      {
+        "path": "/blog",
+        "component": "Blog",
+        "description": "Blog listing page"
+      },
+      {
+        "path": "/privacy",
+        "component": "Privacy",
+        "description": "Privacy policy"
+      },
+      {
+        "path": "/terms",
+        "component": "Terms", 
+        "description": "Terms of service"
+      }
+    ],
+    "protected_routes": [
+      {
+        "path": "/dashboard",
+        "component": "Dashboard",
+        "description": "User dashboard with enrolled courses and progress"
+      },
+      {
+        "path": "/admin",
+        "component": "Admin",
+        "description": "Admin dashboard with analytics",
+        "role_required": "admin"
+      },
+      {
+        "path": "/admin/courses",
+        "component": "AdminCourses",
+        "description": "Course management interface",
+        "role_required": "admin"
+      },
+      {
+        "path": "/admin/portfolio",
+        "component": "AdminPortfolio", 
+        "description": "Portfolio project management",
+        "role_required": "admin"
+      },
+      {
+        "path": "/admin/portfolio/new",
+        "component": "AdminPortfolioForm",
+        "description": "Create new portfolio project",
+        "role_required": "admin"
+      },
+      {
+        "path": "/admin/portfolio/:id/edit",
+        "component": "AdminPortfolioForm",
+        "description": "Edit existing portfolio project",
+        "role_required": "admin"
+      },
+      {
+        "path": "/admin/lessons",
+        "component": "AdminLessons",
+        "description": "Lesson management interface", 
+        "role_required": "admin"
+      },
+      {
+        "path": "/admin/users",
+        "component": "AdminUsers",
+        "description": "User management interface",
+        "role_required": "admin"
+      },
+      {
+        "path": "/admin/resources",
+        "component": "AdminResources",
+        "description": "Resource management interface",
+        "role_required": "admin"
+      },
+      {
+        "path": "/admin/settings",
+        "component": "AdminSiteSettings",
+        "description": "Site settings management",
+        "role_required": "admin"
+      },
+      {
+        "path": "/admin/dft",
+        "component": "AdminDFTSubmissions",
+        "description": "DFT submission management",
+        "role_required": "admin"
+      }
+    ]
+  },
+  "navigation_structure": {
+    "header_navigation": [
+      {"label": "Courses", "path": "/courses"},
+      {"label": "Portfolio", "path": "/portfolio"},
+      {"label": "Contact", "path": "/contact"},
+      {"label": "Career", "path": "/career"}
+    ],
+    "authenticated_navigation": [
+      {"label": "Dashboard", "path": "/dashboard"},
+      {"label": "Admin", "path": "/admin", "role_required": "admin"}
+    ]
+  },
+  "portfolio_features": {
+    "project_showcase": {
+      "description": "Professional portfolio with project case studies",
+      "components": [
+        {
+          "name": "PortfolioCard",
+          "description": "Project preview card with image, title, services, meta info"
+        },
+        {
+          "name": "PortfolioFilterBar", 
+          "description": "Filter by search, service, country with sorting options"
+        },
+        {
+          "name": "Portfolio",
+          "description": "Main portfolio listing page with filtering"
+        },
+        {
+          "name": "PortfolioDetail",
+          "description": "Detailed project case study with gallery, files, related projects"
+        }
+      ]
+    },
+    "admin_management": {
+      "description": "Full CRUD operations for portfolio projects",
+      "components": [
+        {
+          "name": "AdminPortfolio",
+          "description": "Portfolio management dashboard with sortable table"
+        },
+        {
+          "name": "AdminPortfolioForm",
+          "description": "Create/edit portfolio projects with image and file uploads"
+        }
+      ]
+    },
+    "project_structure": {
+      "main_fields": [
+        "title", "slug", "summary", "description_md", "client_name", 
+        "country", "duration_text", "budget_text", "hero_image_url",
+        "services[]", "technologies[]", "status", "featured"
+      ],
+      "related_data": [
+        "portfolio_images (gallery with cover image)",
+        "portfolio_files (downloadable resources)"
+      ]
+    },
+    "filtering_capabilities": [
+      "Search by project title",
+      "Filter by services offered", 
+      "Filter by country/location",
+      "Sort by date or alphabetical",
+      "Featured project highlighting"
+    ]
+  },
+  "gated_content_logic": {
+    "course_access": "Users must be enrolled to access course content",
+    "admin_features": "Admin role required for management interfaces", 
+    "portfolio_drafts": "Only published portfolio projects visible to public",
+    "file_downloads": "Authenticated users can download portfolio files"
+  },
+  "data_fetching_patterns": {
+    "optimized_hooks": [
+      {
+        "name": "useOptimizedDashboardData",
+        "description": "Consolidates user dashboard queries with caching"
+      },
+      {
+        "name": "useOptimizedAdminData", 
+        "description": "Consolidates admin analytics queries with caching"
+      },
+      {
+        "name": "useEnrollment",
+        "description": "Manages course enrollment state and actions"
+      },
+      {
+        "name": "useProgress",
+        "description": "Tracks and updates lesson progress"
+      },
+      {
+        "name": "useGatedContent",
+        "description": "Manages access control for protected content"
+      }
+    ],
+    "query_functions": [
+      {
+        "file": "src/lib/queries/site.ts",
+        "functions": ["getPublishedCourses", "getCourseBySlug", "getSiteSettings", "getTestimonials"]
+      },
+      {
+        "file": "src/lib/queries/portfolio.ts", 
+        "functions": ["getPublishedProjects", "getProjectBySlug", "getRelatedProjects"]
+      }
+    ]
+  },
+  "ui_components": {
+    "shadcn_components": [
+      "Button", "Card", "Input", "Textarea", "Select", "Dialog", "Sheet",
+      "Table", "Badge", "Avatar", "Skeleton", "Toast", "Alert", "Tabs",
+      "Accordion", "Progress", "Calendar", "Command", "Popover", "Switch"
+    ],
+    "custom_components": [
+      {
+        "name": "CourseCard",
+        "description": "Course preview with enrollment status and progress"
+      },
+      {
+        "name": "PortfolioCard",
+        "description": "Portfolio project preview with filtering"
+      },
+      {
+        "name": "DataTable", 
+        "description": "Reusable admin table with sorting and actions"
+      },
+      {
+        "name": "FileUpload",
+        "description": "Drag and drop file upload to Supabase storage"
+      },
+      {
+        "name": "MarkdownViewer",
+        "description": "Renders markdown content for project descriptions"
+      },
+      {
+        "name": "SearchCommand",
+        "description": "Global search command palette (Cmd+K)"
+      },
+      {
+        "name": "LoadingState", 
+        "description": "Consistent loading states with skeletons"
+      },
+      {
+        "name": "EmptyState",
+        "description": "Consistent empty states with call-to-action"
+      },
+      {
+        "name": "ErrorBoundary",
+        "description": "Error handling and recovery"
+      }
+    ]
+  },
+  "page_overviews": {
+    "Index": {
+      "sections": ["Hero with CTA", "Features grid", "Stats/metrics", "Testimonials marquee", "Partner strip"],
+      "components": ["HeroBio", "FeatureGrid", "StatCard", "TestimonialsMarquee", "PartnerStrip"]
+    },
+    "Courses": {
+      "features": ["Course filtering", "Search", "Enrollment status", "Progress tracking"],
+      "components": ["CourseFilterBar", "CourseCard", "LoadingState", "EmptyState"]
+    },
+    "Portfolio": {
+      "features": ["Project filtering by service/country", "Search", "Featured projects", "Case study previews"],
+      "components": ["PortfolioFilterBar", "PortfolioCard", "LoadingState", "EmptyState"]
+    },
+    "PortfolioDetail": {
+      "sections": ["Hero with project meta", "Case study content", "Image gallery", "Downloadable files", "Related projects"],
+      "features": ["Lightbox gallery", "File downloads", "Responsive images", "SEO optimization"]
+    },
+    "Dashboard": {
+      "sections": ["Enrolled courses", "Progress overview", "Recent activity", "Quick actions"],
+      "data": "Optimized with useOptimizedDashboardData hook"
+    },
+    "Admin": {
+      "sections": ["Analytics overview", "Quick stats", "Recent activity", "Management shortcuts"],
+      "data": "Optimized with useOptimizedAdminData hook"
+    }
+  },
+  "authentication_flow": {
+    "signup": "Email/password with automatic profile creation",
+    "login": "Email/password with session persistence",
+    "profile_management": "Users can update own profile, admins manage all",
+    "role_system": "student (default) and admin roles with RLS enforcement"
+  },
+  "performance_optimizations": {
+    "query_optimization": "Consolidated queries in custom hooks",
+    "image_optimization": "Responsive images with lazy loading",
+    "code_splitting": "Route-based code splitting with React Router",
+    "caching": "React Query for server state caching",
+    "skeleton_loading": "Consistent loading states throughout app"
+  },
+  "accessibility_features": {
+    "keyboard_navigation": "Full keyboard support including search command",
+    "screen_readers": "Semantic HTML and ARIA labels",
+    "focus_management": "Proper focus trapping in modals",
+    "color_contrast": "WCAG compliant color schemes"
+  },
+  "analytics_integration": {
+    "file": "src/lib/analytics.ts",
+    "events": ["Course enrollment", "Lesson completion", "Portfolio views", "Contact submissions"]
+  },
+  "keyboard_shortcuts": {
+    "global": [
+      {"keys": "Cmd+K / Ctrl+K", "action": "Open search command palette"},
+      {"keys": "Escape", "action": "Close modals and search"}
+    ]
+  },
+  "file_upload_specifications": {
+    "course_posters": {
+      "bucket": "course-posters",
+      "allowed_types": ["image/jpeg", "image/png", "image/webp"],
+      "max_size": "5MB"
+    },
+    "portfolio_images": {
+      "bucket": "portfolio-images", 
+      "allowed_types": ["image/jpeg", "image/png", "image/webp"],
+      "max_size": "10MB",
+      "features": ["Gallery support", "Cover image designation", "Alt text"]
+    },
+    "portfolio_files": {
+      "bucket": "portfolio-files",
+      "allowed_types": ["application/pdf", "application/zip", "text/plain"],
+      "max_size": "50MB",
+      "features": ["Download tracking", "File size display"]
+    },
+    "documents": {
+      "bucket": "documents",
+      "allowed_types": ["application/pdf", "application/zip", "text/plain"],
+      "access": "Authenticated users only"
+    }
+  },
+  "acceptance_criteria": {
+    "responsive_design": "Mobile-first approach with Tailwind breakpoints",
+    "seo_optimization": "Meta tags, semantic HTML, structured data",
+    "error_handling": "Graceful error states with recovery actions", 
+    "loading_states": "Skeleton loaders and progress indicators",
+    "data_validation": "Zod schemas for form validation",
+    "security": "RLS policies and input sanitization",
+    "performance": "Optimized queries and lazy loading"
+  },
+  "notes_for_ai_builder": {
+    "design_system": "Use semantic tokens from index.css and tailwind.config.ts",
+    "component_patterns": "Prefer composition over inheritance",
+    "data_flow": "Use React Query for server state, local state for UI",
+    "testing_approach": "Focus on user interactions and data flows",
+    "deployment": "Lovable platform with Supabase backend",
+    "maintenance": "Modular architecture for easy updates and scaling"
+  }
+}
