@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { StatCard } from '@/components/StatCard';
@@ -12,17 +12,18 @@ import {
 } from 'lucide-react';
 
 export default function AdminDashboard() {
-  // Fetch dashboard statistics
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ['admin-dashboard-stats'],
-    queryFn: async () => {
+  // Fetch dashboard statistics with optimized queries
+  const { data: stats, isLoading } = useOptimizedQuery(
+    ['admin-dashboard-stats'],
+    async () => {
+      // Parallel execution of count queries for better performance
       const [usersRes, coursesRes, submissionsRes] = await Promise.all([
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('courses').select('id', { count: 'exact', head: true }),
         supabase.from('dft_submissions').select('id', { count: 'exact', head: true })
       ]);
 
-      // Get recent activity (last 7 days)
+      // Get recent activity count (last 7 days) - simplified for performance
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       
@@ -50,65 +51,54 @@ export default function AdminDashboard() {
         recentSubmissions: recentSubmissionsRes.count || 0
       };
     }
-  });
+  );
 
-  // Fetch recent activity
-  const { data: recentActivity } = useQuery({
-    queryKey: ['admin-recent-activity'],
-    queryFn: async () => {
-      const activities = [];
+  // Fetch recent activity with optimized query
+  const { data: recentActivity } = useOptimizedQuery(
+    ['admin-recent-activity'],
+    async () => {
+      // Simplified activity fetch for better performance
+      const [recentUsers, recentCourses, recentSubmissions] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('full_name, created_at')
+          .order('created_at', { ascending: false })
+          .limit(3),
+        supabase
+          .from('courses')
+          .select('title, created_at')
+          .order('created_at', { ascending: false })
+          .limit(3),
+        supabase
+          .from('dft_submissions')
+          .select('created_at')
+          .order('created_at', { ascending: false })
+          .limit(3)
+      ]);
 
-      // Recent user registrations
-      const { data: recentUsers } = await supabase
-        .from('profiles')
-        .select('full_name, created_at')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      // Recent course creations
-      const { data: recentCourses } = await supabase
-        .from('courses')
-        .select('title, created_at')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      // Recent DFT submissions
-      const { data: recentSubmissions } = await supabase
-        .from('dft_submissions')
-        .select('id, created_at, profiles(full_name)')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      // Combine and sort activities
-      if (recentUsers) {
-        activities.push(...recentUsers.map(user => ({
+      const activities = [
+        ...(recentUsers.data?.map(user => ({
           type: 'user_registered',
           title: `${user.full_name || 'New user'} registered`,
           timestamp: user.created_at
-        })));
-      }
-
-      if (recentCourses) {
-        activities.push(...recentCourses.map(course => ({
+        })) || []),
+        ...(recentCourses.data?.map(course => ({
           type: 'course_created',
           title: `Course "${course.title}" was created`,
           timestamp: course.created_at
-        })));
-      }
-
-      if (recentSubmissions) {
-        activities.push(...recentSubmissions.map(submission => ({
+        })) || []),
+        ...(recentSubmissions.data?.map(submission => ({
           type: 'dft_submission',
-          title: `${(submission.profiles as any)?.full_name || 'User'} submitted DFT`,
+          title: `New DFT submission received`,
           timestamp: submission.created_at
-        })));
-      }
+        })) || [])
+      ];
 
       return activities
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-        .slice(0, 10);
+        .slice(0, 8);
     }
-  });
+  );
 
   if (isLoading) {
     return (
