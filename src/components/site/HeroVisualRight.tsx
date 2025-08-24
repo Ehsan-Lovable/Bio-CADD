@@ -13,130 +13,184 @@ export function HeroVisualRight() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
+  // Dynamic bubble positions and connections
+  const bubbles = [
+    { id: 1, x: 200, y: 150, size: 80, initialX: 200, initialY: 150 },
+    { id: 2, x: 350, y: 200, size: 60, initialX: 350, initialY: 200 },
+    { id: 3, x: 120, y: 280, size: 70, initialX: 120, initialY: 280 },
+    { id: 4, x: 300, y: 350, size: 55, initialX: 300, initialY: 350 }
+  ];
+
   return (
     <div className="relative h-full w-full pointer-events-none overflow-hidden select-none">
-      {/* Concentric rings for depth */}
-      <div className="absolute -right-8 -top-8 h-80 w-80 rounded-full border border-mustard-500/20" />
-      <div className="absolute -right-16 top-10 h-96 w-96 rounded-full border border-mustard-500/10" />
+      {/* Ambient glow background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-mustard-500/5 via-transparent to-mustard-600/10" />
+      
+      {/* Floating gradient orbs for depth */}
+      <div className="absolute top-10 right-16 w-32 h-32 bg-gradient-to-br from-mustard-400/20 to-mustard-600/10 rounded-full blur-xl animate-drift" />
+      <div className="absolute bottom-20 left-10 w-24 h-24 bg-gradient-to-tr from-mustard-500/15 to-mustard-400/5 rounded-full blur-lg animate-drift" style={{ animationDelay: '2s' }} />
 
-      {/* Dotted grid background */}
-      <svg aria-hidden className="absolute inset-0 h-full w-full opacity-10">
+      {/* Main liquid bubbles SVG */}
+      <svg aria-hidden className="relative h-full w-full" viewBox="0 0 500 400">
         <defs>
-          <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
-            <circle cx="1" cy="1" r="1" fill="hsl(var(--mustard-500))" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#dots)" />
-      </svg>
-      {/* Molecule cluster with enhanced visuals */}
-      <svg aria-hidden className="relative h-[420px] w-[420px]" viewBox="0 0 600 600">
-        <g stroke="hsl(var(--mustard-400))" strokeOpacity="0.6" strokeWidth="2">
-          <line x1="160" y1="300" x2="260" y2="220" />
-          <line x1="260" y1="220" x2="360" y2="280" />
-          <line x1="360" y1="280" x2="440" y2="200" />
-          <line x1="260" y1="220" x2="240" y2="120" />
-          <line x1="360" y1="280" x2="480" y2="320" />
-        </g>
-        <g>
-          {[
-            {x:160, y:300, r:10}, {x:260, y:220, r:12}, {x:360, y:280, r:9},
-            {x:440, y:200, r:7}, {x:240, y:120, r:8}, {x:480, y:320, r:11}
-          ].map((node, i) => (
-            <circle 
-              key={i} 
-              cx={node.x} 
-              cy={node.y} 
-              r={node.r} 
-              fill="hsl(var(--mustard-500))"
-              className={shouldAnimate ? 'animate-float' : ''}
-              style={{ animationDelay: `${i * 0.25}s` }}
-            />
-          ))}
-        </g>
-      </svg>
+          {/* Liquid bubble gradients */}
+          <radialGradient id="bubble1" cx="30%" cy="30%">
+            <stop offset="0%" stopColor="hsl(var(--mustard-400))" stopOpacity="0.8" />
+            <stop offset="70%" stopColor="hsl(var(--mustard-500))" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="hsl(var(--mustard-600))" stopOpacity="0.3" />
+          </radialGradient>
+          <radialGradient id="bubble2" cx="40%" cy="25%">
+            <stop offset="0%" stopColor="hsl(var(--mustard-300))" stopOpacity="0.9" />
+            <stop offset="60%" stopColor="hsl(var(--mustard-500))" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="hsl(var(--mustard-700))" stopOpacity="0.4" />
+          </radialGradient>
+          <radialGradient id="bubble3" cx="35%" cy="40%">
+            <stop offset="0%" stopColor="hsl(var(--mustard-400))" stopOpacity="0.85" />
+            <stop offset="65%" stopColor="hsl(var(--mustard-600))" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="hsl(var(--mustard-800))" stopOpacity="0.3" />
+          </radialGradient>
+          <radialGradient id="bubble4" cx="45%" cy="30%">
+            <stop offset="0%" stopColor="hsl(var(--mustard-300))" stopOpacity="0.8" />
+            <stop offset="70%" stopColor="hsl(var(--mustard-500))" stopOpacity="0.65" />
+            <stop offset="100%" stopColor="hsl(var(--mustard-700))" stopOpacity="0.35" />
+          </radialGradient>
 
-      {/* DNA helix with improved styling */}
-      <svg 
-        aria-hidden 
-        className={`absolute right-10 top-6 h-56 w-56 opacity-90 ${shouldAnimate ? 'animate-drift' : ''}`} 
-        viewBox="0 0 200 200"
-      >
-        <defs>
-          <linearGradient id="helix" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--mustard-500))" />
-            <stop offset="100%" stopColor="hsl(var(--mustard-600))" />
+          {/* Dynamic connection line gradient */}
+          <linearGradient id="connection" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="hsl(var(--mustard-400))" stopOpacity="0.6" />
+            <stop offset="50%" stopColor="hsl(var(--mustard-500))" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="hsl(var(--mustard-400))" stopOpacity="0.6" />
           </linearGradient>
         </defs>
-        <g stroke="url(#helix)" strokeWidth="3" fill="none">
-          <path d="M30,10 C80,40 120,0 170,30" />
-          <path d="M30,40 C80,70 120,30 170,60" />
-          <path d="M30,70 C80,100 120,60 170,90" />
-          <path d="M30,100 C80,130 120,90 170,120" />
-          <path d="M30,130 C80,160 120,120 170,150" />
-          <path d="M30,160 C80,190 120,150 170,180" />
-          {[
-            [30,40,170,30], [30,70,170,60], [30,100,170,90], 
-            [30,130,170,120], [30,160,170,150]
-          ].map((coords, i) => (
-            <line 
-              key={i} 
-              x1={coords[0]} y1={coords[1]} 
-              x2={coords[2]} y2={coords[3]} 
-              strokeOpacity="0.6" 
-            />
-          ))}
+
+        {/* Dynamic connection lines between bubbles */}
+        <g stroke="url(#connection)" strokeWidth="2" fill="none" className={shouldAnimate ? 'animate-pulse-connection' : ''}>
+          <path d="M 200 150 Q 275 175 350 200" strokeOpacity="0.7" />
+          <path d="M 200 150 Q 160 215 120 280" strokeOpacity="0.5" />
+          <path d="M 350 200 Q 325 275 300 350" strokeOpacity="0.6" />
+          <path d="M 120 280 Q 210 315 300 350" strokeOpacity="0.4" className={shouldAnimate ? 'animate-connect-disconnect' : ''} />
         </g>
-      </svg>
 
-      {/* Mass spec sparkline with enhanced styling */}
-      <svg 
-        aria-hidden 
-        className="absolute bottom-4 right-2 h-24 w-40 opacity-80" 
-        viewBox="0 0 200 100"
-      >
-        <polyline 
-          points="10,90 30,60 40,90 60,50 65,90 90,30 95,90 120,45 130,90 160,40 170,90"
-          fill="none" 
-          stroke="hsl(var(--mustard-500))" 
-          strokeWidth="3" 
-        />
-      </svg>
+        {/* Liquid bubble shapes */}
+        {bubbles.map((bubble, index) => (
+          <g key={bubble.id}>
+            {/* Main bubble with organic liquid shape */}
+            <path
+              d={`M ${bubble.x - bubble.size/2} ${bubble.y} 
+                  C ${bubble.x - bubble.size*0.7} ${bubble.y - bubble.size*0.4},
+                    ${bubble.x - bubble.size*0.4} ${bubble.y - bubble.size*0.7},
+                    ${bubble.x} ${bubble.y - bubble.size/2}
+                  C ${bubble.x + bubble.size*0.4} ${bubble.y - bubble.size*0.7},
+                    ${bubble.x + bubble.size*0.7} ${bubble.y - bubble.size*0.4},
+                    ${bubble.x + bubble.size/2} ${bubble.y}
+                  C ${bubble.x + bubble.size*0.7} ${bubble.y + bubble.size*0.4},
+                    ${bubble.x + bubble.size*0.4} ${bubble.y + bubble.size*0.7},
+                    ${bubble.x} ${bubble.y + bubble.size/2}
+                  C ${bubble.x - bubble.size*0.4} ${bubble.y + bubble.size*0.7},
+                    ${bubble.x - bubble.size*0.7} ${bubble.y + bubble.size*0.4},
+                    ${bubble.x - bubble.size/2} ${bubble.y} Z`}
+              fill={`url(#bubble${index + 1})`}
+              className={shouldAnimate ? 'animate-liquid-float' : ''}
+              style={{ 
+                animationDelay: `${index * 0.8}s`,
+                animationDuration: `${6 + index}s`
+              }}
+            />
+            
+            {/* Inner highlight for 3D effect */}
+            <ellipse
+              cx={bubble.x - bubble.size * 0.2}
+              cy={bubble.y - bubble.size * 0.2}
+              rx={bubble.size * 0.15}
+              ry={bubble.size * 0.1}
+              fill="hsl(var(--mustard-200))"
+              opacity="0.6"
+              className={shouldAnimate ? 'animate-liquid-float' : ''}
+              style={{ 
+                animationDelay: `${index * 0.8}s`,
+                animationDuration: `${6 + index}s`
+              }}
+            />
+          </g>
+        ))}
 
-      {/* Floating particles for additional depth */}
-      <div className="absolute inset-0">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className={`absolute w-1 h-1 bg-mustard-500 rounded-full opacity-40 ${
-              shouldAnimate ? 'animate-drift' : ''
-            }`}
-            style={{
-              left: `${20 + (i * 12)}%`,
-              top: `${30 + (i % 3 * 20)}%`,
-              animationDuration: `${8 + (i * 2)}s`,
-              animationDelay: `${i * 0.8}s`,
+        {/* Micro bubbles for extra detail */}
+        {[...Array(8)].map((_, i) => (
+          <circle
+            key={`micro-${i}`}
+            cx={50 + (i * 45)}
+            cy={80 + (i % 3 * 40)}
+            r={2 + (i % 3)}
+            fill="hsl(var(--mustard-400))"
+            opacity="0.4"
+            className={shouldAnimate ? 'animate-micro-float' : ''}
+            style={{ 
+              animationDelay: `${i * 0.3}s`,
+              animationDuration: `${4 + (i % 3)}s`
             }}
           />
         ))}
-      </div>
+      </svg>
 
-      {/* Add CSS animations for motion preferences */}
+      {/* CSS animations for liquid effects */}
       <style>{`
         @media (prefers-reduced-motion: no-preference) {
-          @keyframes float { 
-            0%, 100% { transform: translateY(0px) rotate(0deg); } 
-            50% { transform: translateY(-8px) rotate(2deg); } 
+          @keyframes liquid-float { 
+            0%, 100% { 
+              transform: translate(0px, 0px) scale(1) rotate(0deg); 
+            } 
+            25% { 
+              transform: translate(-8px, -12px) scale(1.05) rotate(1deg); 
+            }
+            50% { 
+              transform: translate(6px, -8px) scale(0.98) rotate(-1deg); 
+            }
+            75% { 
+              transform: translate(-4px, 10px) scale(1.02) rotate(0.5deg); 
+            }
           }
-          .animate-float { 
-            animation: float 6s ease-in-out infinite; 
+          .animate-liquid-float { 
+            animation: liquid-float 8s ease-in-out infinite; 
+            transform-origin: center center;
+          }
+          
+          @keyframes micro-float { 
+            0%, 100% { transform: translateY(0px) scale(1); opacity: 0.4; } 
+            50% { transform: translateY(-15px) scale(1.2); opacity: 0.7; } 
+          }
+          .animate-micro-float { 
+            animation: micro-float 5s ease-in-out infinite; 
           }
           
           @keyframes drift { 
-            0%, 100% { filter: drop-shadow(0 0 0 rgba(255,183,3,0)); } 
-            50% { filter: drop-shadow(0 0 8px rgba(255,183,3,0.2)); } 
+            0%, 100% { 
+              transform: translate(0px, 0px) scale(1);
+              filter: blur(12px);
+            } 
+            50% { 
+              transform: translate(20px, -15px) scale(1.1);
+              filter: blur(8px);
+            } 
           }
           .animate-drift { 
-            animation: drift 5s ease-in-out infinite; 
+            animation: drift 12s ease-in-out infinite; 
+          }
+
+          @keyframes pulse-connection {
+            0%, 100% { stroke-opacity: 0.3; }
+            50% { stroke-opacity: 0.8; }
+          }
+          .animate-pulse-connection {
+            animation: pulse-connection 4s ease-in-out infinite;
+          }
+
+          @keyframes connect-disconnect {
+            0%, 100% { stroke-opacity: 0; }
+            25%, 75% { stroke-opacity: 0.6; }
+            50% { stroke-opacity: 0; }
+          }
+          .animate-connect-disconnect {
+            animation: connect-disconnect 8s ease-in-out infinite;
           }
         }
       `}</style>

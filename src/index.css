@@ -145,8 +145,20 @@ All colors MUST be HSL for proper theming.
   .animate-marquee:hover {
     animation-play-state: paused;
   }
-  
-  .hover\\:pause:hover {
-    animation-play-state: paused;
-  }
+}
+
+/* Smooth scrolling and page positioning */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4rem;
+}
+
+/* Ensure pages start at top */
+body {
+  scroll-behavior: smooth;
+}
+
+/* Fix for React Router page scrolling */
+#root {
+  scroll-behavior: smooth;
 }
