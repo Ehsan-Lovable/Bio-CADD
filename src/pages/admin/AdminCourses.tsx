@@ -14,8 +14,7 @@ import { FileUpload } from '@/components/FileUpload';
 import { StringRepeatableList, RoadmapRepeatableList } from '@/components/RepeatableList';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Badge } from '@/components/ui/badge';
-import MDEditor from '@uiw/react-md-editor';
-import '@uiw/react-md-editor/markdown-editor.css';
+import { RichTextEditor } from '@/components/RichTextEditor';
 import { 
   Plus, 
   Edit, 
@@ -742,21 +741,16 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
               
               <div>
                 <Label htmlFor="description">Description</Label>
-                <div className="mt-2" data-color-mode="light">
-                  <MDEditor
+                <div className="mt-2">
+                  <RichTextEditor
                     value={formData.description}
-                    onChange={(value) => setFormData(prev => ({ ...prev, description: value || '' }))}
-                    preview="edit"
-                    hideToolbar={false}
-                    visibleDragBar={false}
+                    onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                    placeholder="Write your course description with rich formatting..."
                     height={300}
-                    textareaProps={{
-                      placeholder: 'Write your course description with markdown formatting...\n\n**Bold text** for emphasis\n*Italic text* for style\n# Large headings\n## Medium headings\n- Bullet points\n> Highlighted quotes\n\nAnd much more!'
-                    }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Use markdown formatting: **bold**, *italic*, # headings, - lists, &gt; quotes, etc.
+                  Use the toolbar above to format text: bold, italic, headings, lists, colors, and more.
                 </p>
               </div>
               
