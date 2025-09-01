@@ -54,8 +54,8 @@ export default function Auth() {
           title: "Welcome back!",
           description: "You've been signed in successfully.",
         });
-        // Force page reload for clean state
-        window.location.href = '/dashboard';
+        // Navigate to dashboard
+        navigate('/dashboard');
       }
     } catch (error: any) {
       toast({
@@ -104,8 +104,8 @@ export default function Auth() {
             title: "Account created!",
             description: "You've been signed up successfully.",
           });
-          // Force page reload for clean state
-          window.location.href = '/dashboard';
+          // Navigate to dashboard
+          navigate('/dashboard');
         } else {
           toast({
             title: "Account created!",
