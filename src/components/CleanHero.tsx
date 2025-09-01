@@ -6,20 +6,24 @@ import { supabase } from '@/integrations/supabase/client';
 import './CleanHero.css';
 
 const CleanHero = () => {
-  // Fetch featured courses
+  // Fetch featured courses - simplified query to avoid type issues
   const { data: featuredCourses, isLoading: coursesLoading } = useQuery({
     queryKey: ['featured-courses'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('status', 'published')
-        .eq('featured', true)
-        .order('created_at', { ascending: false })
-        .limit(3);
-      
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase
+          .from('courses')
+          .select('id, title, description, slug, difficulty, duration_text')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(3);
+        
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.error('Error fetching featured courses:', error);
+        return [];
+      }
     }
   });
 
@@ -42,7 +46,7 @@ const CleanHero = () => {
                   Explore Courses
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="cta-secondary font-pp-neue">
+              <Button asChild size="lg" className="cta-primary font-pp-neue">
                 <Link to="/contact">
                   <Play className="mr-2 w-5 h-5" />
                   Book Consultation

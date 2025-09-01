@@ -35,7 +35,6 @@ export default function AdminSubmissions() {
         .from('dft_submissions')
         .select(`
           *,
-          profiles(full_name, phone),
           courses(title, course_type, start_date)
         `)
         .order('created_at', { ascending: false });
@@ -103,11 +102,10 @@ export default function AdminSubmissions() {
 
     const csvData = submissions.map(submission => [
       submission.id,
-      submission.profiles?.full_name || 'N/A',
-      submission.profiles?.phone || 'N/A',
+      submission.user_id || 'N/A',
       submission.courses?.title || 'N/A',
       submission.status,
-      submission.submission_link || 'N/A',
+      submission.link || 'N/A',
       new Date(submission.created_at).toLocaleDateString()
     ]);
 
@@ -214,7 +212,7 @@ export default function AdminSubmissions() {
   const actions = [
     {
       label: 'View Details',
-      icon: <Eye className="h-4 w-4" />,
+      icon: Eye,
       onClick: (submission: any) => setSelectedSubmission(submission)
     }
   ];
