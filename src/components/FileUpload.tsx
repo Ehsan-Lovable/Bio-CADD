@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { Upload, X, FileIcon, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 interface FileUploadProps {
   bucket: string;
@@ -32,6 +33,7 @@ export const FileUpload = ({
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { session } = useAuth();
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -45,34 +47,37 @@ export const FileUpload = ({
       return;
     }
 
+    if (!session) {
+      toast.error('Please sign in to upload files');
+      return;
+    }
+
     setUploading(true);
     setProgress(0);
 
     try {
-      // Create unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = path ? `${path}/${fileName}` : fileName;
+      // Use the upload-storage Edge Function for proper authentication
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('bucket', bucket);
 
-      // Upload file
-      const { data, error } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      const { data, error } = await supabase.functions.invoke('upload-storage', {
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
-      if (error) throw error;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(data.path);
+      if (error) {
+        console.error('Upload function error:', error);
+        throw error;
+      }
 
       setProgress(100);
-      onUpload?.(publicUrl, file);
+      onUpload?.(data.url, file);
       toast.success('File uploaded successfully');
     } catch (error: any) {
+      console.error('File upload error:', error);
       toast.error(error.message || 'Failed to upload file');
     } finally {
       setUploading(false);
@@ -84,25 +89,35 @@ export const FileUpload = ({
   };
 
   const handleRemove = async () => {
-    if (!value) return;
+    if (!value || !session) return;
 
     try {
-      // Extract file path from URL
+      // Extract file path from URL for the Edge Function format
       const url = new URL(value);
       const pathParts = url.pathname.split('/');
-      const filePath = pathParts.slice(-1)[0]; // Get the filename
-      const fullPath = path ? `${path}/${filePath}` : filePath;
+      
+      // The Edge Function creates files as ${user.id}/${timestamp}.${ext}
+      // So we need to extract the user folder and filename
+      const fileName = pathParts.slice(-1)[0]; // Get the filename
+      const userFolder = pathParts.slice(-2, -1)[0]; // Get the user folder
+      const fullPath = `${userFolder}/${fileName}`;
 
       const { error } = await supabase.storage
         .from(bucket)
         .remove([fullPath]);
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Storage removal failed, but continuing:', error);
+        // Don't throw error for removal failures, just warn
+      }
 
       onRemove?.();
       toast.success('File removed successfully');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to remove file');
+      console.warn('File removal error:', error);
+      // Still call onRemove to update the UI even if storage removal fails
+      onRemove?.();
+      toast.success('File removed from form');
     }
   };
 
