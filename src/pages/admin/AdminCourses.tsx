@@ -14,7 +14,7 @@ import { FileUpload } from '@/components/FileUpload';
 import { StringRepeatableList, RoadmapRepeatableList } from '@/components/RepeatableList';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Badge } from '@/components/ui/badge';
-import { RichTextEditor } from '@/components/RichTextEditor';
+import { ResizableRichTextEditor } from '@/components/ResizableRichTextEditor';
 import { 
   Plus, 
   Edit, 
@@ -740,17 +740,17 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
               </div>
               
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">Course Description</Label>
                 <div className="mt-2">
-                  <RichTextEditor
+                  <ResizableRichTextEditor
                     value={formData.description}
                     onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-                    placeholder="Write your course description with rich formatting..."
-                    height={300}
+                    placeholder="Write a compelling course description. Use the toolbar to format text with bold, italic, headings, colors, lists, and more..."
+                    minHeight={300}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Use the toolbar above to format text: bold, italic, headings, lists, colors, and more.
+                <p className="text-xs text-muted-foreground mt-2">
+                  💡 <strong>Tip:</strong> Use toolbar buttons like Gmail. Drag corner to resize.
                 </p>
               </div>
               
