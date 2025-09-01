@@ -186,7 +186,7 @@ export default function Admin() {
         onClose={() => setSidebarOpen(false)} 
       />
       
-      <main className={`flex-1 ${!isMobile ? 'ml-64' : ''}`}>
+      <main className={`flex-1 ${!isMobile ? '' : ''}`}>
         {/* Mobile header */}
         {isMobile && (
           <header className="sticky top-0 z-30 bg-background border-b p-4">
