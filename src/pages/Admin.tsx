@@ -27,6 +27,7 @@ import AdminPortfolio from './admin/AdminPortfolio';
 import AdminLessons from './admin/AdminLessons';
 import AdminResources from './admin/AdminResources';
 import AdminSubmissions from './admin/AdminSubmissions';
+import AdminEnrollmentForms from './admin/AdminEnrollmentForms';
 import AdminUsers from './admin/AdminUsers';
 import AdminSiteSettings from './admin/AdminSiteSettings';
 import AdminUpcomingSessions from './admin/AdminUpcomingSessions';
@@ -64,6 +65,11 @@ const sidebarItems = [
     name: 'Submissions', 
     path: '/admin/submissions', 
     icon: Upload 
+  },
+  { 
+    name: 'Enrollment Forms', 
+    path: '/admin/enrollment-forms', 
+    icon: FileText 
   },
   { 
     name: 'Users', 
@@ -208,6 +214,7 @@ export default function Admin() {
             <Route path="lessons/*" element={<AdminLessons />} />
             <Route path="resources/*" element={<AdminResources />} />
             <Route path="submissions" element={<AdminSubmissions />} />
+            <Route path="enrollment-forms" element={<AdminEnrollmentForms />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="settings" element={<AdminSiteSettings />} />
             <Route path="upcoming-sessions" element={<AdminUpcomingSessions />} />

@@ -202,6 +202,109 @@ export type Database = {
           },
         ]
       }
+      enrollment_form_fields: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          field_label: string
+          field_name: string
+          field_options: Json | null
+          field_order: number
+          field_type: string
+          id: string
+          is_active: boolean
+          is_required: boolean
+          updated_at: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          field_label: string
+          field_name: string
+          field_options?: Json | null
+          field_order?: number
+          field_type: string
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          field_label?: string
+          field_name?: string
+          field_options?: Json | null
+          field_order?: number
+          field_type?: string
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollment_form_fields_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enrollment_submissions: {
+        Row: {
+          admin_notes: string | null
+          course_id: string
+          created_at: string
+          form_data: Json
+          id: string
+          payment_screenshot_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          course_id: string
+          created_at?: string
+          form_data?: Json
+          id?: string
+          payment_screenshot_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          course_id?: string
+          created_at?: string
+          form_data?: Json
+          id?: string
+          payment_screenshot_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollment_submissions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enrollments: {
         Row: {
           course_id: string

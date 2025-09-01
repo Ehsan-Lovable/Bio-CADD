@@ -10,62 +10,78 @@ export const useEnrollment = () => {
   const { session } = useAuth();
 
   const enroll = async (courseId: string) => {
+    // This function now just checks if user has already submitted enrollment form
     if (!session) {
       toast.error('Please sign in to enroll in courses');
       navigate('/auth');
       return false;
     }
 
-    setIsEnrolling(true);
-    
+    // Check if user has already submitted enrollment for this course
     try {
-      const { data, error } = await supabase.functions.invoke('enroll', {
-        body: { courseId },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+      const { data: existingSubmission } = await supabase
+        .from('enrollment_submissions')
+        .select('id, status')
+        .eq('user_id', session.user.id)
+        .eq('course_id', courseId)
+        .single();
 
-      if (error) {
-        throw error;
-      }
-
-      toast.success(data.message);
-      
-      // Redirect to dashboard if specified
-      if (data.redirect) {
-        navigate(data.redirect);
+      if (existingSubmission) {
+        toast.info(`You have already submitted an enrollment form for this course. Status: ${existingSubmission.status}`);
+        return false;
       }
       
-      return true;
+      return true; // Allow opening enrollment form
     } catch (error: any) {
-      console.error('Enrollment error:', error);
-      toast.error(error.message || 'Failed to enroll in course');
-      return false;
-    } finally {
-      setIsEnrolling(false);
+      console.error('Error checking enrollment status:', error);
+      return true; // Allow enrollment if check fails
     }
   };
 
   const checkEnrollment = async (courseId: string) => {
-    if (!session) return false;
+    if (!session) return { isEnrolled: false, hasSubmitted: false, status: null };
 
     try {
-      const { data, error } = await supabase
+      // Check enrollment submissions first
+      const { data: submission, error: submissionError } = await supabase
+        .from('enrollment_submissions')
+        .select('id, status')
+        .eq('user_id', session.user.id)
+        .eq('course_id', courseId)
+        .single();
+
+      if (submissionError && submissionError.code !== 'PGRST116') {
+        throw submissionError;
+      }
+
+      if (submission) {
+        return {
+          isEnrolled: submission.status === 'approved',
+          hasSubmitted: true,
+          status: submission.status
+        };
+      }
+
+      // Fallback to old enrollments table for backwards compatibility
+      const { data: enrollment, error: enrollmentError } = await supabase
         .from('enrollments')
         .select('id, status')
         .eq('user_id', session.user.id)
         .eq('course_id', courseId)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (enrollmentError && enrollmentError.code !== 'PGRST116') {
+        throw enrollmentError;
       }
 
-      return data ? data.status === 'active' : false;
+      return {
+        isEnrolled: enrollment ? enrollment.status === 'active' : false,
+        hasSubmitted: false,
+        status: enrollment?.status || null
+      };
     } catch (error) {
       console.error('Error checking enrollment:', error);
-      return false;
+      return { isEnrolled: false, hasSubmitted: false, status: null };
     }
   };
 

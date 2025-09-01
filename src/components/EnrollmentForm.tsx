@@ -1,0 +1,277 @@
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { FileUpload } from '@/components/FileUpload';
+import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { X, DollarSign } from 'lucide-react';
+
+interface EnrollmentFormProps {
+  courseId: string;
+  course: any;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+interface FormField {
+  id: string;
+  field_name: string;
+  field_type: string;
+  field_label: string;
+  field_options: any; // Use any to handle Json type from Supabase
+  is_required: boolean;
+  field_order: number;
+}
+
+const createFormSchema = (fields: FormField[]) => {
+  const schemaObject: Record<string, any> = {};
+  
+  fields.forEach(field => {
+    let fieldSchema;
+    
+    switch (field.field_type) {
+      case 'email':
+        fieldSchema = z.string().email('Please enter a valid email address');
+        break;
+      case 'tel':
+        fieldSchema = z.string().min(1, 'Phone number is required');
+        break;
+      case 'file':
+        fieldSchema = z.string().url('Please upload a valid file');
+        break;
+      default:
+        fieldSchema = z.string().min(1, `${field.field_label} is required`);
+    }
+    
+    if (!field.is_required) {
+      fieldSchema = fieldSchema.optional().or(z.literal(''));
+    }
+    
+    schemaObject[field.field_name as string] = fieldSchema;
+  });
+  
+  return z.object(schemaObject);
+};
+
+export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
+  courseId,
+  course,
+  isOpen,
+  onClose,
+  onSuccess
+}) => {
+  const { session } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch form fields for this course
+  const { data: formFields, isLoading } = useQuery({
+    queryKey: ['enrollment-form-fields', courseId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('enrollment_form_fields')
+        .select('*')
+        .eq('course_id', courseId)
+        .eq('is_active', true)
+        .order('field_order');
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: isOpen && !!courseId
+  });
+
+  // Create dynamic form schema based on fields
+  const formSchema = formFields ? createFormSchema(formFields) : z.object({});
+  
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {}
+  });
+
+  const onSubmit = async (data: any) => {
+    if (!session) {
+      toast.error('Please sign in to enroll in this course');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // Separate payment screenshot from other form data
+      const { payment_screenshot, ...formData } = data;
+      
+      // Submit enrollment form
+      const { error } = await supabase
+        .from('enrollment_submissions')
+        .insert({
+          user_id: session.user.id,
+          course_id: courseId,
+          form_data: formData,
+          payment_screenshot_url: payment_screenshot,
+          status: 'submitted'
+        });
+
+      if (error) throw error;
+
+      toast.success('Enrollment form submitted successfully! We will review and contact you soon.');
+      form.reset();
+      onSuccess();
+      onClose();
+    } catch (error: any) {
+      console.error('Enrollment submission error:', error);
+      toast.error(error.message || 'Failed to submit enrollment form');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const renderFormField = (field: FormField) => {
+    const { field_name, field_type, field_label, field_options, is_required } = field;
+
+    return (
+      <FormField
+        key={field.id}
+        control={form.control}
+        name={field_name as any}
+        render={({ field: formField }) => (
+          <FormItem>
+            <FormLabel className="flex items-center gap-1">
+              {field_label}
+              {is_required && <span className="text-red-500 text-xs">*</span>}
+            </FormLabel>
+            <FormControl>
+              {field_type === 'select' ? (
+                <Select onValueChange={formField.onChange} value={formField.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={`Select ${field_label.toLowerCase()}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(Array.isArray(field_options) ? field_options : []).map((option: string) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : field_type === 'textarea' ? (
+                <Textarea
+                  placeholder={`Enter ${field_label.toLowerCase()}`}
+                  {...formField}
+                />
+              ) : field_type === 'file' ? (
+                <FileUpload
+                  bucket="documents"
+                  path={`enrollment-documents/${session?.user.id}`}
+                  onUpload={(url) => formField.onChange(url)}
+                  onRemove={() => formField.onChange('')}
+                  maxSize={10}
+                  accept="image/*,.pdf,.doc,.docx"
+                />
+              ) : (
+                <Input
+                  type={field_type}
+                  placeholder={`Enter ${field_label.toLowerCase()}`}
+                  {...formField}
+                />
+              )}
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="border-b pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-xl font-bold text-primary">
+                Secure your seat
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Complete the form below to enroll in {course?.title}
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogHeader>
+
+        {isLoading ? (
+          <div className="p-6">
+            <div className="animate-pulse space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-10 bg-gray-200 rounded" />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-6">
+              {/* Course Fee Display */}
+              <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                      <DollarSign className="h-5 w-5" />
+                      Course Fee - ${course?.price_offer || course?.price_regular || 50}
+                    </h3>
+                    <div className="flex justify-center gap-4 mt-3 text-sm">
+                      <div className="text-center">
+                        <Badge variant="outline" className="text-xs">UPI</Badge>
+                        <p className="font-mono text-xs mt-1">9123999858@xiiB</p>
+                      </div>
+                      <div className="text-center">
+                        <Badge variant="outline" className="text-xs">PayPal</Badge>
+                        <p className="font-mono text-xs mt-1">haifa114@gmail.com</p>
+                      </div>
+                      <div className="text-center">
+                        <Badge variant="outline" className="text-xs">Bkash</Badge>
+                        <p className="font-mono text-xs mt-1">+8801994256422</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Dynamic Form Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formFields?.map((field) => (
+                  <div key={field.id} className={field.field_type === 'textarea' || field.field_type === 'file' ? 'md:col-span-2' : ''}>
+                    {renderFormField(field)}
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-primary to-primary/80"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting Registration...' : 'Submit Registration'}
+              </Button>
+            </form>
+          </Form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};

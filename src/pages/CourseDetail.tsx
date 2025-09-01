@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { EnrollmentForm } from '@/components/EnrollmentForm';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -38,6 +40,8 @@ const CourseDetail = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { trackCourseView, trackCourseEnrollment } = useAnalytics();
+  const [showEnrollmentForm, setShowEnrollmentForm] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ['course-detail', slug],
@@ -70,20 +74,48 @@ const CourseDetail = () => {
     enabled: !!course?.id
   });
 
-  const { data: enrollment } = useQuery({
-    queryKey: ['enrollment', course?.id, user?.id],
+  const { data: enrollmentStatus } = useQuery({
+    queryKey: ['enrollment-status', course?.id, user?.id],
     queryFn: async () => {
-      if (!user?.id || !course?.id) return null;
+      if (!user?.id || !course?.id) return { isEnrolled: false, hasSubmitted: false, status: null };
       
-      const { data, error } = await supabase
+      // Check enrollment submissions first
+      const { data: submission, error: submissionError } = await supabase
+        .from('enrollment_submissions')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('course_id', course.id)
+        .single();
+
+      if (submissionError && submissionError.code !== 'PGRST116') {
+        throw submissionError;
+      }
+
+      if (submission) {
+        return {
+          isEnrolled: submission.status === 'approved',
+          hasSubmitted: true,
+          status: submission.status
+        };
+      }
+
+      // Fallback to old enrollments table for backwards compatibility
+      const { data: enrollment, error: enrollmentError } = await supabase
         .from('enrollments')
         .select('*')
         .eq('course_id', course.id)
         .eq('user_id', user.id)
         .maybeSingle();
       
-      if (error) throw error;
-      return data;
+      if (enrollmentError && enrollmentError.code !== 'PGRST116') {
+        throw enrollmentError;
+      }
+      
+      return {
+        isEnrolled: enrollment ? enrollment.status === 'active' : false,
+        hasSubmitted: false,
+        status: enrollment?.status || null
+      };
     },
     enabled: !!user?.id && !!course?.id
   });
@@ -103,25 +135,29 @@ const CourseDetail = () => {
 
     if (!course) return;
 
+    // Check if user has already submitted enrollment for this course
     try {
-      const { error } = await supabase
-        .from('enrollments')
-        .insert({
-          course_id: course.id,
-          user_id: user.id,
-          status: 'active',
-          payment_status: course.price_regular ? 'unpaid' : 'paid'
-        });
+      const { data: existingSubmission } = await supabase
+        .from('enrollment_submissions')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('course_id', course.id)
+        .single();
 
-      if (error) throw error;
-
-      // Track enrollment
-      trackCourseEnrollment(course.id, course.title, finalPrice);
-      toast.success('Successfully enrolled in the course!');
-      // Refetch enrollment data
-      window.location.reload();
+      if (existingSubmission) {
+        toast.info(`You have already submitted an enrollment form for this course. Status: ${existingSubmission.status}`);
+        return;
+      }
+      
+      setShowEnrollmentForm(true);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to enroll in course');
+      if (error.code === 'PGRST116') {
+        // No existing submission found, allow enrollment
+        setShowEnrollmentForm(true);
+      } else {
+        console.error('Error checking enrollment status:', error);
+        setShowEnrollmentForm(true);
+      }
     }
   };
 
@@ -155,7 +191,7 @@ const CourseDetail = () => {
     );
   }
 
-  const isEnrolled = !!enrollment;
+  const isEnrolled = enrollmentStatus?.isEnrolled;
   const finalPrice = course.price_offer || course.price_regular;
 
   return (
@@ -427,8 +463,11 @@ const CourseDetail = () => {
                         onClick={handleEnroll}
                         className="w-full" 
                         size="lg"
+                        disabled={enrollmentStatus?.hasSubmitted}
                       >
-                        Enroll Now
+                        {enrollmentStatus?.hasSubmitted 
+                          ? `Application ${enrollmentStatus.status}` 
+                          : 'Enroll Now'}
                       </Button>
                     ) : (
                       <Button 
@@ -449,6 +488,18 @@ const CourseDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Enrollment Form Modal */}
+        <EnrollmentForm
+          courseId={course?.id || ''}
+          course={course}
+          isOpen={showEnrollmentForm}
+          onClose={() => setShowEnrollmentForm(false)}
+          onSuccess={() => {
+            // Refetch enrollment status after successful submission
+            queryClient.invalidateQueries({ queryKey: ['enrollment-status', course?.id] });
+          }}
+        />
       </main>
       <Footer />
     </>

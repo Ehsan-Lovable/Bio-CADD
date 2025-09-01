@@ -32,7 +32,7 @@ export default function AdminSubmissions() {
     queryKey: ['admin-submissions', statusFilter, courseFilter],
     queryFn: async () => {
       let query = supabase
-        .from('dft_submissions')
+        .from('enrollment_submissions')
         .select(`
           *,
           courses(title, course_type, start_date)
@@ -102,11 +102,12 @@ export default function AdminSubmissions() {
 
     const csvData = submissions.map(submission => [
       submission.id,
-      submission.user_id || 'N/A',
+      (submission.form_data as any)?.full_name || 'N/A',
+      (submission.form_data as any)?.phone || 'N/A',
       submission.courses?.title || 'N/A',
       submission.status,
-      submission.link || 'N/A',
-      new Date(submission.created_at).toLocaleDateString()
+      submission.payment_screenshot_url || 'N/A',
+      new Date(submission.submitted_at).toLocaleDateString()
     ]);
 
     const csvContent = [csvHeaders, ...csvData]
@@ -128,7 +129,7 @@ export default function AdminSubmissions() {
       header: 'Student Name',
       render: (value: string, row: any) => (
         <div className="font-medium text-gray-900">
-          {row.profiles?.full_name || 'N/A'}
+          {(row.form_data as any)?.full_name || 'N/A'}
         </div>
       )
     },
@@ -137,7 +138,7 @@ export default function AdminSubmissions() {
       header: 'Phone',
       render: (value: string, row: any) => (
         <div className="text-sm text-gray-700">
-          {row.profiles?.phone || 'N/A'}
+          {(row.form_data as any)?.phone || 'N/A'}
         </div>
       )
     },
@@ -176,8 +177,8 @@ export default function AdminSubmissions() {
       )
     },
     {
-      key: 'submission_link' as const,
-      header: 'Submission',
+      key: 'payment_screenshot_url' as const,
+      header: 'Payment Screenshot',
       render: (value: string) => (
         <div className="text-sm">
           {value ? (
@@ -187,16 +188,16 @@ export default function AdminSubmissions() {
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-800 underline"
             >
-              View Submission
+              View Screenshot
             </a>
           ) : (
-            <span className="text-gray-500">No link</span>
+            <span className="text-gray-500">No screenshot</span>
           )}
         </div>
       )
     },
     {
-      key: 'created_at' as const,
+      key: 'submitted_at' as const,
       header: 'Submitted',
       render: (value: string) => (
         <div className="flex items-center gap-2">
@@ -441,14 +442,14 @@ export default function AdminSubmissions() {
                 <div>
                   <label className="text-sm font-medium text-gray-700">Student Name</label>
                   <div className="mt-1 text-sm text-gray-900">
-                    {selectedSubmission.profiles?.full_name || 'N/A'}
+                    {(selectedSubmission.form_data as any)?.full_name || 'N/A'}
                   </div>
                 </div>
 
                 <div>
                   <label className="text-sm font-medium text-gray-700">Phone</label>
                   <div className="mt-1 text-sm text-gray-900">
-                    {selectedSubmission.profiles?.phone || 'N/A'}
+                    {(selectedSubmission.form_data as any)?.phone || 'N/A'}
                   </div>
                 </div>
 
