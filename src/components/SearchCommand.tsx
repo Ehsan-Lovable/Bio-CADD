@@ -54,9 +54,8 @@ export function SearchCommand() {
   const pages = [
     { name: "Home", path: "/", icon: Home },
     { name: "All Courses", path: "/courses", icon: BookOpen },
-    { name: "Blog", path: "/blog", icon: FileText },
+    { name: "Portfolio", path: "/portfolio", icon: Briefcase },
     { name: "Contact", path: "/contact", icon: MessageSquare },
-    { name: "Career", path: "/career", icon: Briefcase },
     ...(user ? [
       { name: "Dashboard", path: "/dashboard", icon: User },
     ] : []),

@@ -19,8 +19,12 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'heading': ['Inter', 'system-ui', 'sans-serif'],
-				'body': ['Inter', 'system-ui', 'sans-serif'],
+				'heading': ['PP Neue Montreal', 'Inter', 'system-ui', 'sans-serif'],
+				'body': ['PP Neue Montreal', 'Inter', 'system-ui', 'sans-serif'],
+				'sans': ['PP Neue Montreal', 'Inter', 'system-ui', 'sans-serif'],
+				'mono': ['PPSupplyMono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+				'pp-neue': ['PP Neue Montreal', 'sans-serif'],
+				'pp-mono': ['PPSupplyMono', 'monospace'],
 			},
 			letterSpacing: {
 				'tight': '-0.025em',

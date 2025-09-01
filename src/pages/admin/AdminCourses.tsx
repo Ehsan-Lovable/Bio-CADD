@@ -230,6 +230,11 @@ const AdminCoursesIndex = () => {
             <Badge variant={course.status === 'published' ? 'default' : 'secondary'} className="text-xs">
               {course.status}
             </Badge>
+            {course.featured && (
+              <Badge variant="default" className="text-xs bg-yellow-500 hover:bg-yellow-600">
+                Featured
+              </Badge>
+            )}
           </div>
         </div>
       )
@@ -557,6 +562,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
     audience: '',
     difficulty: '',
     module_count: '',
+    featured: false,
     status: 'draft' as 'draft' | 'published' | 'archived'
   });
 
@@ -986,6 +992,15 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
                     <SelectItem value="published">Published</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="featured"
+                  checked={formData.featured}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: !!checked }))}
+                />
+                <Label htmlFor="featured">Featured Course</Label>
               </div>
             </div>
           </Card>

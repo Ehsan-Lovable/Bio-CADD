@@ -32,6 +32,7 @@ import AdminSiteSettings from './admin/AdminSiteSettings';
 import AdminUpcomingSessions from './admin/AdminUpcomingSessions';
 import AdminBlog from './admin/AdminBlog';
 
+
 const sidebarItems = [
   { 
     name: 'Dashboard', 
@@ -84,6 +85,7 @@ const sidebarItems = [
     path: '/admin/blog', 
     icon: BlogIcon 
   },
+
   { 
     name: 'TEST ITEM', 
     path: '/admin/test', 
@@ -210,6 +212,7 @@ export default function Admin() {
             <Route path="settings" element={<AdminSiteSettings />} />
             <Route path="upcoming-sessions" element={<AdminUpcomingSessions />} />
             <Route path="blog/*" element={<AdminBlog />} />
+
           </Routes>
         </div>
       </main>

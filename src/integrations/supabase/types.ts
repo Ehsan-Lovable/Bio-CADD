@@ -453,6 +453,7 @@ export type Database = {
         }
         Relationships: []
       }
+
       profiles: {
         Row: {
           avatar_url: string | null

@@ -1,6 +1,30 @@
+@import url("https://fonts.cdnfonts.com/css/pp-neue-montreal");
+
+@font-face {
+  font-family: "PPSupplyMono";
+  src: url("https://assets.codepen.io/7558/PPSupplyMono-Regular.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
 
 /* Mustard + Black Design System
 All colors MUST be HSL for proper theming.
@@ -8,6 +32,12 @@ All colors MUST be HSL for proper theming.
 
 @layer base {
   :root {
+    /* Typography */
+    --font-primary: "PP Neue Montreal", "Inter", system-ui, sans-serif;
+    --font-secondary: "PPSupplyMono", ui-monospace, "SFMono-Regular", monospace;
+    --font-sans: "PP Neue Montreal", "Inter", system-ui, sans-serif;
+    --font-mono: "PPSupplyMono", ui-monospace, "SFMono-Regular", monospace;
+
     /* Core mustard palette */
     --mustard-50: 48 100% 96%;
     --mustard-100: 46 100% 91%;
@@ -127,6 +157,38 @@ All colors MUST be HSL for proper theming.
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Apply PP Neue Montreal as default sans font */
+  .font-sans {
+    font-family: var(--font-sans) !important;
+  }
+  
+  /* Apply PPSupplyMono as default mono font */
+  .font-mono {
+    font-family: var(--font-mono) !important;
+  }
+  
+  /* Specific font classes */
+  .font-pp-neue {
+    font-family: var(--font-primary) !important;
+  }
+  
+  .font-pp-mono {
+    font-family: var(--font-secondary) !important;
+  }
+  
+  /* Heading styles with PP Neue Montreal */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary);
+  }
+  
+  /* Code and pre elements with PPSupplyMono */
+  code, pre {
+    font-family: var(--font-secondary);
   }
   
   @keyframes marquee {

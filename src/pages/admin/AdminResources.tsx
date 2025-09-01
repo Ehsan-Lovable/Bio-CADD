@@ -157,10 +157,11 @@ export default function AdminResources() {
     if (!editingResource) return;
 
     const formData = new FormData(e.target as HTMLFormElement);
+    const courseId = formData.get('course_id') as string;
     const resourceData = {
       ...editingResource,
       title: formData.get('title') as string,
-      course_id: formData.get('course_id') as string || null,
+      course_id: courseId === 'global' ? null : courseId,
       resource_type: formData.get('resource_type') as string,
       order: parseInt(formData.get('order') as string) || 0,
       url: editingResource.url || ''
@@ -208,12 +209,12 @@ export default function AdminResources() {
 
               <div>
                 <Label htmlFor="course_id">Course (optional)</Label>
-                <Select name="course_id" defaultValue={editingResource.course_id || ''}>
+                <Select name="course_id" defaultValue={editingResource.course_id ? editingResource.course_id : 'global'}>
                   <SelectTrigger>
                     <SelectValue placeholder="Global resource" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Global (not linked to course)</SelectItem>
+                    <SelectItem value="global">Global (not linked to course)</SelectItem>
                     {courses?.map((course) => (
                       <SelectItem key={course.id} value={course.id}>
                         {course.title}

@@ -4,6 +4,9 @@ import { PortfolioCard } from '@/components/PortfolioCard';
 import { PortfolioFilterBar } from '@/components/PortfolioFilterBar';
 import { LoadingState } from '@/components/LoadingState';
 import { EmptyState } from '@/components/EmptyState';
+import { BioinformaticsServicesSection } from '@/components/BioinformaticsServicesSection';
+import { ServicesMarquee } from '@/components/ServicesMarquee';
+
 import { supabase } from '@/integrations/supabase/client';
 import { FileText, Briefcase } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
@@ -152,6 +155,12 @@ export default function Portfolio() {
       />
 
       <div className="min-h-screen bg-background">
+        {/* Bioinformatics & CADD Services Section */}
+        <BioinformaticsServicesSection />
+
+        {/* Services Marquee */}
+        <ServicesMarquee />
+
         {/* Hero Section */}
         <section className="bg-black relative overflow-hidden">
           {/* Background Effects */}
@@ -171,6 +180,7 @@ export default function Portfolio() {
             </div>
           </div>
         </section>
+
 
         {/* Main Content */}
         <section className="container mx-auto px-4 py-12">

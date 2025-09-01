@@ -9,6 +9,9 @@ import { ProjectCardSkeleton } from '@/components/site/LoadingSkeletons';
 import { getPublishedProjects } from '@/lib/queries/portfolio';
 import { SEOHead } from '@/components/SEOHead';
 import { Header } from '@/components/Header';
+import { BioinformaticsServicesSection } from '@/components/BioinformaticsServicesSection';
+import { ServicesMarquee } from '@/components/ServicesMarquee';
+
 import { toast } from 'sonner';
 
 interface PortfolioProject {
@@ -167,6 +170,12 @@ export function PortfolioList() {
         />
 
         <Header />
+
+        {/* Bioinformatics & CADD Services Section */}
+        <BioinformaticsServicesSection />
+
+        {/* Services Marquee */}
+        <ServicesMarquee />
 
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-background to-accent/20 py-20 border-b">

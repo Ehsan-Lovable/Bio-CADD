@@ -10,9 +10,7 @@ const navLinks = [
   { name: 'Home', path: '/', title: 'Go to homepage', icon: Sparkles },
   { name: 'Courses', path: '/courses', title: 'Browse available courses' },
   { name: 'Portfolio', path: '/portfolio', title: 'View project portfolio' },
-  { name: 'Blog', path: '/blog', title: 'Read our blog' },
   { name: 'Contact', path: '/contact', title: 'Get in touch' },
-  { name: 'Career', path: '/career', title: 'Career opportunities' },
 ];
 
 interface MainNavProps {
