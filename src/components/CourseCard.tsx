@@ -2,8 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Clock, Award, Users, Play, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useEnrollment } from '@/hooks/useEnrollment';
+import { Link, useNavigate } from 'react-router-dom';
 import { useGatedContent } from '@/hooks/useGatedContent';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -27,13 +26,14 @@ interface CourseCardProps {
 
 export const CourseCard = ({ course, className }: CourseCardProps) => {
   const { session } = useAuth();
-  const { enroll, isEnrolling } = useEnrollment();
   const { isEnrolled, canViewContent } = useGatedContent(course.id);
+  const navigate = useNavigate();
 
-  const handleEnroll = async (e: React.MouseEvent) => {
+  const handleEnrollClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    await enroll(course.id);
+    // Navigate to course detail page for enrollment
+    navigate(`/courses/${course.slug}`);
   };
 
   return (
@@ -138,11 +138,10 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
             ) : (
               <Button 
                 size="sm" 
-                onClick={handleEnroll}
-                disabled={isEnrolling}
+                onClick={handleEnrollClick}
                 className="ml-2"
               >
-                {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
+                Enroll Now
               </Button>
             )}
           </div>
