@@ -118,7 +118,7 @@ const AdminSidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
       <aside className={`
         fixed top-0 left-0 h-full w-64 bg-card border-r z-50 transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        ${!isMobile ? 'relative translate-x-0' : ''}
+        ${!isMobile ? 'relative translate-x-0 w-64' : ''}
       `}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
@@ -186,7 +186,7 @@ export default function Admin() {
         onClose={() => setSidebarOpen(false)} 
       />
       
-      <main className={`flex-1 ${!isMobile ? 'ml-64' : ''}`}>
+      <main className="flex-1">
         {/* Mobile header */}
         {isMobile && (
           <header className="sticky top-0 z-30 bg-background border-b p-4">
@@ -200,7 +200,7 @@ export default function Admin() {
           </header>
         )}
         
-        <div className="p-6">
+        <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
           <Routes>
             <Route index element={<AdminDashboard />} />
             <Route path="courses/*" element={<AdminCourses />} />
