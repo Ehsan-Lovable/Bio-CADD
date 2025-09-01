@@ -30,6 +30,7 @@ interface Action<T> {
   onClick: (row: T) => void;
   variant?: 'default' | 'destructive';
   icon?: React.ComponentType<any> | ((row: T) => React.ComponentType<any>);
+  condition?: (row: T) => boolean;
 }
 
 interface DataTableProps<T> {
@@ -198,7 +199,9 @@ export function DataTable<T extends Record<string, any>>({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {actions.map((action, actionIndex) => (
+                          {actions
+                            .filter((action) => !action.condition || action.condition(row))
+                            .map((action, actionIndex) => (
                             <DropdownMenuItem
                               key={actionIndex}
                               onClick={() => action.onClick(row)}

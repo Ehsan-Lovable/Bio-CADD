@@ -1,18 +1,22 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DataTable } from '@/components/DataTable';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Eye, Users, BookOpen, Calendar } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { Download, Eye, Users, BookOpen, Calendar, CheckCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminSubmissions() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [courseFilter, setCourseFilter] = useState('all');
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
+  const [actionSubmission, setActionSubmission] = useState<any>(null);
+  const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
+  const queryClient = useQueryClient();
 
   const handleViewScreenshot = async (url: string) => {
     try {
@@ -70,6 +74,75 @@ export default function AdminSubmissions() {
     } catch (error: any) {
       console.error('Error viewing screenshot:', error);
       toast.error(`Error accessing screenshot: ${error.message}`);
+    }
+  };
+
+  const handleApproveSubmission = async () => {
+    if (!actionSubmission) return;
+
+    try {
+      // Update submission status to approved
+      const { error: updateError } = await supabase
+        .from('enrollment_submissions')
+        .update({ 
+          status: 'approved',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: (await supabase.auth.getUser()).data.user?.id
+        })
+        .eq('id', actionSubmission.id);
+
+      if (updateError) throw updateError;
+
+      // Create enrollment record in the enrollments table
+      const { error: enrollError } = await supabase
+        .from('enrollments')
+        .insert({
+          user_id: actionSubmission.user_id,
+          course_id: actionSubmission.course_id,
+          status: 'active',
+          payment_status: 'paid'
+        });
+
+      if (enrollError && enrollError.code !== '23505') { // Ignore duplicate key errors
+        throw enrollError;
+      }
+
+      toast.success('Enrollment approved successfully!');
+      
+      // Refresh the data
+      queryClient.invalidateQueries({ queryKey: ['admin-submissions'] });
+      setActionSubmission(null);
+      setActionType(null);
+    } catch (error: any) {
+      console.error('Error approving submission:', error);
+      toast.error(error.message || 'Failed to approve submission');
+    }
+  };
+
+  const handleRejectSubmission = async () => {
+    if (!actionSubmission) return;
+
+    try {
+      const { error } = await supabase
+        .from('enrollment_submissions')
+        .update({ 
+          status: 'rejected',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: (await supabase.auth.getUser()).data.user?.id
+        })
+        .eq('id', actionSubmission.id);
+
+      if (error) throw error;
+
+      toast.success('Enrollment rejected');
+      
+      // Refresh the data
+      queryClient.invalidateQueries({ queryKey: ['admin-submissions'] });
+      setActionSubmission(null);
+      setActionType(null);
+    } catch (error: any) {
+      console.error('Error rejecting submission:', error);
+      toast.error(error.message || 'Failed to reject submission');
     }
   };
 
@@ -275,6 +348,27 @@ export default function AdminSubmissions() {
       label: 'View Details',
       icon: Eye,
       onClick: (submission: any) => setSelectedSubmission(submission)
+    },
+    {
+      label: 'Approve',
+      icon: CheckCircle,
+      onClick: (submission: any) => {
+        setActionSubmission(submission);
+        setActionType('approve');
+      },
+      // Only show for submitted applications
+      condition: (submission: any) => submission.status === 'submitted'
+    },
+    {
+      label: 'Reject',
+      icon: X,
+      onClick: (submission: any) => {
+        setActionSubmission(submission);
+        setActionType('reject');
+      },
+      variant: 'destructive' as const,
+      // Only show for submitted applications
+      condition: (submission: any) => submission.status === 'submitted'
     }
   ];
 
@@ -580,6 +674,24 @@ export default function AdminSubmissions() {
           </Card>
         </div>
       )}
+
+      {/* Confirmation Dialog for Actions */}
+      <ConfirmDialog
+        open={!!actionSubmission && !!actionType}
+        onOpenChange={() => {
+          setActionSubmission(null);
+          setActionType(null);
+        }}
+        title={actionType === 'approve' ? 'Approve Enrollment' : 'Reject Enrollment'}
+        description={
+          actionType === 'approve' 
+            ? `Are you sure you want to approve this enrollment application? The student will be enrolled in the course and can access all content.`
+            : `Are you sure you want to reject this enrollment application? The student will be notified and cannot access the course content.`
+        }
+        confirmText={actionType === 'approve' ? 'Approve' : 'Reject'}
+        onConfirm={actionType === 'approve' ? handleApproveSubmission : handleRejectSubmission}
+        variant={actionType === 'reject' ? 'destructive' : 'default'}
+      />
     </div>
   );
 }

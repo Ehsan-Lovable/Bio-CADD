@@ -173,14 +173,14 @@ export default function Dashboard() {
                   />
                 ) : (
                   <div className="space-y-4">
-                    {enrolledCourses.slice(0, 3).map((enrollment) => (
-                      <div key={enrollment.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    {enrolledCourses.slice(0, 3).map((item) => (
+                      <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-4">
                           <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg flex items-center justify-center">
-                            {enrollment.courses?.poster_url ? (
+                            {item.courses?.poster_url ? (
                               <img 
-                                src={enrollment.courses.poster_url} 
-                                alt={enrollment.courses.title}
+                                src={item.courses.poster_url} 
+                                alt={item.courses.title}
                                 className="w-full h-full object-cover rounded-lg"
                               />
                             ) : (
@@ -188,22 +188,37 @@ export default function Dashboard() {
                             )}
                           </div>
                           <div>
-                            <h4 className="font-semibold">{enrollment.courses?.title}</h4>
+                            <h4 className="font-semibold">{item.courses?.title}</h4>
                             <p className="text-sm text-muted-foreground">
-                              {enrollment.courses?.course_type?.charAt(0).toUpperCase() + 
-                               enrollment.courses?.course_type?.slice(1) || 'Course'}
+                              {item.courses?.course_type?.charAt(0).toUpperCase() + 
+                               item.courses?.course_type?.slice(1) || 'Course'}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="secondary" className="text-xs">
-                                In Progress
-                              </Badge>
+                              {item.type === 'enrollment' ? (
+                                <Badge variant="default" className="text-xs">
+                                  Enrolled
+                                </Badge>
+                              ) : (
+                                <Badge 
+                                  variant={
+                                    item.applicationStatus === 'approved' ? 'default' :
+                                    item.applicationStatus === 'rejected' ? 'destructive' :
+                                    'secondary'
+                                  } 
+                                  className="text-xs"
+                                >
+                                  {item.applicationStatus === 'approved' ? 'Approved' :
+                                   item.applicationStatus === 'rejected' ? 'Rejected' :
+                                   'Under Review'}
+                                </Badge>
+                              )}
                             </div>
                           </div>
                         </div>
-                        <Button asChild size="sm">
-                          <Link to={`/courses/${enrollment.courses?.slug}`}>
+                        <Button asChild size="sm" disabled={item.type === 'application' && item.applicationStatus !== 'approved'}>
+                          <Link to={`/courses/${item.courses?.slug}`}>
                             <Play className="h-4 w-4 mr-2" />
-                            Resume
+                            {item.type === 'enrollment' ? 'Resume' : 'View Course'}
                           </Link>
                         </Button>
                       </div>

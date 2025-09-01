@@ -27,7 +27,8 @@ import {
   Lock,
   Calendar,
   Target,
-  Zap
+  Zap,
+  X
 } from 'lucide-react';
 
 const CourseDetailSkeleton = () => (
@@ -471,16 +472,53 @@ const CourseDetail = () => {
                 ) : (
                   <div className="space-y-3">
                     {user ? (
-                      <Button 
-                        onClick={handleEnroll}
-                        className="w-full" 
-                        size="lg"
-                        disabled={enrollmentStatus?.hasSubmitted}
-                      >
-                        {enrollmentStatus?.hasSubmitted 
-                          ? `Application ${enrollmentStatus.status}` 
-                          : 'Enroll Now'}
-                      </Button>
+                      <>
+                        {enrollmentStatus?.hasSubmitted ? (
+                          <div className="space-y-2">
+                            <div className={`flex items-center gap-2 rounded-lg p-3 ${
+                              enrollmentStatus.status === 'approved' ? 'text-green-700 bg-green-50' :
+                              enrollmentStatus.status === 'rejected' ? 'text-red-700 bg-red-50' :
+                              'text-yellow-700 bg-yellow-50'
+                            }`}>
+                              {enrollmentStatus.status === 'approved' ? (
+                                <CheckCircle className="h-5 w-5" />
+                              ) : enrollmentStatus.status === 'rejected' ? (
+                                <X className="h-5 w-5" />
+                              ) : (
+                                <Clock className="h-5 w-5" />
+                              )}
+                              <span className="font-medium">
+                                {enrollmentStatus.status === 'approved' ? 'Registration Complete!' :
+                                 enrollmentStatus.status === 'rejected' ? 'Application Rejected' :
+                                 'Application Under Review'}
+                              </span>
+                            </div>
+                            {enrollmentStatus.status === 'submitted' && (
+                              <p className="text-xs text-muted-foreground text-center">
+                                We're reviewing your application. You'll be notified once approved.
+                              </p>
+                            )}
+                            {enrollmentStatus.status === 'rejected' && (
+                              <Button 
+                                onClick={handleEnroll}
+                                className="w-full" 
+                                size="lg"
+                                variant="outline"
+                              >
+                                Apply Again
+                              </Button>
+                            )}
+                          </div>
+                        ) : (
+                          <Button 
+                            onClick={handleEnroll}
+                            className="w-full" 
+                            size="lg"
+                          >
+                            Enroll Now
+                          </Button>
+                        )}
+                      </>
                     ) : (
                       <Button 
                         onClick={() => navigate('/auth')}
@@ -491,9 +529,11 @@ const CourseDetail = () => {
                       </Button>
                     )}
                     
-                    <p className="text-xs text-muted-foreground text-center">
-                      30-day money-back guarantee
-                    </p>
+                    {!enrollmentStatus?.hasSubmitted && (
+                      <p className="text-xs text-muted-foreground text-center">
+                        30-day money-back guarantee
+                      </p>
+                    )}
                   </div>
                 )}
               </Card>

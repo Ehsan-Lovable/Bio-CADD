@@ -40,32 +40,82 @@ export const useOptimizedDashboardData = () => {
     }
   );
 
-  // Optimized query for enrolled courses (limited to 3 for dashboard)
+  // Optimized query for enrolled courses and applications (limited to 3 for dashboard)
   const { data: enrolledCourses, isLoading: coursesLoading } = useOptimizedQuery(
-    ['enrolled-courses-limited', session?.user?.id],
+    ['enrolled-courses-and-applications', session?.user?.id],
     async () => {
       if (!session) return [];
 
-      const { data, error } = await supabase
-        .from('enrollments')
-        .select(`
-          id,
-          created_at,
-          courses!inner (
+      // Get both approved enrollments and pending applications
+      const [enrollmentsRes, applicationsRes] = await Promise.all([
+        supabase
+          .from('enrollments')
+          .select(`
             id,
-            title,
-            slug,
-            poster_url,
-            course_type
-          )
-        `)
-        .eq('user_id', session.user.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(3); // Only get 3 for dashboard
+            created_at,
+            status,
+            courses!inner (
+              id,
+              title,
+              slug,
+              poster_url,
+              course_type
+            )
+          `)
+          .eq('user_id', session.user.id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false }),
+        
+        supabase
+          .from('enrollment_submissions')
+          .select(`
+            id,
+            created_at,
+            status,
+            courses!inner (
+              id,
+              title,
+              slug,
+              poster_url,
+              course_type
+            )
+          `)
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+      ]);
 
-      if (error) throw error;
-      return data || [];
+      if (enrollmentsRes.error) throw enrollmentsRes.error;
+      if (applicationsRes.error) throw applicationsRes.error;
+
+      // Combine and deduplicate by course_id, prioritizing enrollments over applications
+      const enrollments = enrollmentsRes.data || [];
+      const applications = applicationsRes.data || [];
+      
+      const courseMap = new Map();
+      
+      // Add enrollments first (higher priority)
+      enrollments.forEach(enrollment => {
+        courseMap.set(enrollment.courses.id, {
+          ...enrollment,
+          type: 'enrollment',
+          applicationStatus: null
+        });
+      });
+      
+      // Add applications only if no enrollment exists for that course
+      applications.forEach(application => {
+        if (!courseMap.has(application.courses.id)) {
+          courseMap.set(application.courses.id, {
+            ...application,
+            type: 'application',
+            applicationStatus: application.status
+          });
+        }
+      });
+
+      return Array.from(courseMap.values())
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 3);
     }
   );
 
