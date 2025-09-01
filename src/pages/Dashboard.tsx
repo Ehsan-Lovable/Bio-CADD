@@ -5,7 +5,7 @@ import { StatCard } from '@/components/StatCard';
 import { EmptyState } from '@/components/EmptyState';
 import { useOptimizedDashboardData } from '@/hooks/useOptimizedDashboardData';
 import { useAuth } from '@/hooks/useAuth';
-import { signOut } from '@/lib/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   BookOpen, 
   Award, 
@@ -27,7 +27,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    await signOut();
+    await supabase.auth.signOut();
     navigate('/');
   };
 
