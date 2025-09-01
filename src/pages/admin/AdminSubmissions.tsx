@@ -7,11 +7,71 @@ import { DataTable } from '@/components/DataTable';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, Eye, Users, BookOpen, Calendar } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminSubmissions() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [courseFilter, setCourseFilter] = useState('all');
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
+
+  const handleViewScreenshot = async (url: string) => {
+    try {
+      console.log('Attempting to view screenshot:', url);
+      
+      // Check if the documents bucket exists first
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      
+      if (bucketError) {
+        console.error('Error listing buckets:', bucketError);
+        toast.error('Unable to access storage. Please contact support.');
+        return;
+      }
+      
+      const documentsBucket = buckets?.find(bucket => bucket.name === 'documents');
+      if (!documentsBucket) {
+        console.error('Documents bucket not found');
+        toast.error('Storage bucket not found. Please run the database migration to fix this issue.');
+        return;
+      }
+      
+      // Extract the file path from the URL
+      const urlObj = new URL(url);
+      const pathParts = urlObj.pathname.split('/').filter(part => part);
+      
+      console.log('URL parts:', pathParts);
+      
+      // Look for the file path after 'documents' in the URL
+      let filePath = '';
+      const documentsIndex = pathParts.findIndex(part => part === 'documents');
+      
+      if (documentsIndex !== -1 && documentsIndex < pathParts.length - 1) {
+        // Get everything after 'documents'
+        filePath = pathParts.slice(documentsIndex + 1).join('/');
+        console.log('Extracted file path:', filePath);
+        
+        // Try to create a signed URL for admin access
+        const { data, error } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(filePath, 3600);
+        
+        if (!error && data?.signedUrl) {
+          console.log('Successfully created signed URL');
+          window.open(data.signedUrl, '_blank');
+          return;
+        } else {
+          console.warn('Signed URL creation failed:', error);
+          toast.error(`Failed to generate secure link: ${error?.message || 'Unknown error'}`);
+        }
+      } else {
+        console.error('Invalid URL format - cannot extract file path');
+        toast.error('Invalid screenshot URL format');
+      }
+      
+    } catch (error: any) {
+      console.error('Error viewing screenshot:', error);
+      toast.error(`Error accessing screenshot: ${error.message}`);
+    }
+  };
 
   // Fetch courses for filtering
   const { data: courses } = useQuery({
@@ -182,14 +242,14 @@ export default function AdminSubmissions() {
       render: (value: string) => (
         <div className="text-sm">
           {value ? (
-            <a 
-              href={value} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline"
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleViewScreenshot(value)}
+              className="text-blue-600 hover:text-blue-800"
             >
               View Screenshot
-            </a>
+            </Button>
           ) : (
             <span className="text-gray-500">No screenshot</span>
           )}
