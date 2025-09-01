@@ -104,7 +104,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
   });
 
   const onSubmit = async (data: FormData) => {
-    if (!session) {
+    if (!session?.user?.id) {
       toast.error('Please sign in to enroll in this course');
       return;
     }
@@ -112,21 +112,31 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
     setIsSubmitting(true);
     
     try {
+      // Validate required session data
+      if (!session.access_token) {
+        throw new Error('Authentication token not available. Please sign in again.');
+      }
+
       // Separate payment screenshot from other form data
       const { payment_screenshot, ...formData } = data;
       
-      // Submit enrollment form
+      console.log('Submitting enrollment with user_id:', session.user.id);
+      
+      // Submit enrollment form with explicit user authentication
       const { error } = await supabase
         .from('enrollment_submissions')
         .insert({
           user_id: session.user.id,
           course_id: courseId,
           form_data: formData,
-          payment_screenshot_url: payment_screenshot,
+          payment_screenshot_url: payment_screenshot || null,
           status: 'submitted'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error details:', error);
+        throw error;
+      }
 
       toast.success('Enrollment form submitted successfully! We will review and contact you soon.');
       form.reset();
@@ -134,7 +144,15 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       onClose();
     } catch (error: any) {
       console.error('Enrollment submission error:', error);
-      toast.error(error.message || 'Failed to submit enrollment form');
+      
+      // Provide more specific error messages
+      if (error.message?.includes('row-level security')) {
+        toast.error('Authentication error. Please refresh the page and try again.');
+      } else if (error.message?.includes('violates')) {
+        toast.error('Permission denied. Please ensure you are logged in correctly.');
+      } else {
+        toast.error(error.message || 'Failed to submit enrollment form');
+      }
     } finally {
       setIsSubmitting(false);
     }

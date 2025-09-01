@@ -128,36 +128,49 @@ const CourseDetail = () => {
   }, [course, trackCourseView]);
 
   const handleEnroll = async () => {
+    console.log('Enroll button clicked', { user, course: course?.id });
+    
     if (!user) {
+      console.log('No user found, redirecting to auth');
       navigate('/auth');
       return;
     }
 
-    if (!course) return;
+    if (!course) {
+      console.log('No course found');
+      return;
+    }
+
+    console.log('Checking existing enrollment for user:', user.id, 'course:', course.id);
 
     // Check if user has already submitted enrollment for this course
     try {
-      const { data: existingSubmission } = await supabase
+      const { data: existingSubmission, error: checkError } = await supabase
         .from('enrollment_submissions')
         .select('id, status')
         .eq('user_id', user.id)
         .eq('course_id', course.id)
         .single();
 
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking enrollment:', checkError);
+        // Still allow enrollment if check fails
+        setShowEnrollmentForm(true);
+        return;
+      }
+
       if (existingSubmission) {
+        console.log('Found existing submission:', existingSubmission);
         toast.info(`You have already submitted an enrollment form for this course. Status: ${existingSubmission.status}`);
         return;
       }
       
+      console.log('No existing submission found, opening enrollment form');
       setShowEnrollmentForm(true);
     } catch (error: any) {
-      if (error.code === 'PGRST116') {
-        // No existing submission found, allow enrollment
-        setShowEnrollmentForm(true);
-      } else {
-        console.error('Error checking enrollment status:', error);
-        setShowEnrollmentForm(true);
-      }
+      console.error('Unexpected error in handleEnroll:', error);
+      // Always allow enrollment if there's an unexpected error
+      setShowEnrollmentForm(true);
     }
   };
 
