@@ -109,20 +109,30 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       return;
     }
 
+    if (!courseId) {
+      toast.error('Course information is missing');
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
-      // Validate required session data
-      if (!session.access_token) {
-        throw new Error('Authentication token not available. Please sign in again.');
-      }
-
       // Separate payment screenshot from other form data
       const { payment_screenshot, ...formData } = data;
       
-      console.log('Submitting enrollment with user_id:', session.user.id);
+      // Validate required fields
+      if (!formData || Object.keys(formData).length === 0) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      console.log('Submitting enrollment with:', {
+        user_id: session.user.id,
+        course_id: courseId,
+        form_data: formData,
+        payment_screenshot_url: payment_screenshot
+      });
       
-      // Submit enrollment form with explicit user authentication
+      // Submit enrollment form
       const { error } = await supabase
         .from('enrollment_submissions')
         .insert({
@@ -134,7 +144,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
         });
 
       if (error) {
-        console.error('Database error details:', error);
+        console.error('Database error:', error);
         throw error;
       }
 
@@ -144,14 +154,10 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       onClose();
     } catch (error: any) {
       console.error('Enrollment submission error:', error);
-      
-      // Provide more specific error messages
       if (error.message?.includes('row-level security')) {
-        toast.error('Authentication error. Please refresh the page and try again.');
-      } else if (error.message?.includes('violates')) {
-        toast.error('Permission denied. Please ensure you are logged in correctly.');
+        toast.error('Authentication error. Please sign out and sign in again.');
       } else {
-        toast.error(error.message || 'Failed to submit enrollment form');
+        toast.error(error.message || 'Failed to submit enrollment form. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
