@@ -1,8 +1,9 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { EnrollmentForm } from '@/components/EnrollmentForm';
 import { useAuth } from '@/hooks/useAuth';
-import { useEnrollment } from '@/hooks/useEnrollment';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { LoadingState } from '@/components/LoadingState';
 import { SEOHead } from '@/components/SEOHead';
 import { useAnalytics } from '@/lib/analytics';
-import { useEffect } from 'react';
+import { toast } from 'sonner';
 import { 
   ArrowLeft, 
   Play, 
@@ -38,7 +39,8 @@ const CourseDetail = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { trackCourseView, trackCourseEnrollment } = useAnalytics();
-  const { enroll, isEnrolling } = useEnrollment();
+  const [showEnrollmentForm, setShowEnrollmentForm] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ['course-detail', slug],
@@ -71,20 +73,48 @@ const CourseDetail = () => {
     enabled: !!course?.id
   });
 
-  const { data: enrollment } = useQuery({
-    queryKey: ['enrollment', course?.id, user?.id],
+  const { data: enrollmentStatus } = useQuery({
+    queryKey: ['enrollment-status', course?.id, user?.id],
     queryFn: async () => {
-      if (!user?.id || !course?.id) return null;
+      if (!user?.id || !course?.id) return { isEnrolled: false, hasSubmitted: false, status: null };
       
-      const { data, error } = await supabase
+      // Check enrollment submissions first
+      const { data: submission, error: submissionError } = await supabase
+        .from('enrollment_submissions')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('course_id', course.id)
+        .single();
+
+      if (submissionError && submissionError.code !== 'PGRST116') {
+        throw submissionError;
+      }
+
+      if (submission) {
+        return {
+          isEnrolled: submission.status === 'approved',
+          hasSubmitted: true,
+          status: submission.status
+        };
+      }
+
+      // Fallback to old enrollments table for backwards compatibility
+      const { data: enrollment, error: enrollmentError } = await supabase
         .from('enrollments')
         .select('*')
         .eq('course_id', course.id)
         .eq('user_id', user.id)
         .maybeSingle();
       
-      if (error) throw error;
-      return data;
+      if (enrollmentError && enrollmentError.code !== 'PGRST116') {
+        throw enrollmentError;
+      }
+      
+      return {
+        isEnrolled: enrollment ? enrollment.status === 'active' : false,
+        hasSubmitted: false,
+        status: enrollment?.status || null
+      };
     },
     enabled: !!user?.id && !!course?.id
   });
@@ -97,19 +127,49 @@ const CourseDetail = () => {
   }, [course, trackCourseView]);
 
   const handleEnroll = async () => {
+    console.log('Enroll button clicked', { user, course: course?.id });
+    
     if (!user) {
+      console.log('No user found, redirecting to auth');
       navigate('/auth');
       return;
     }
 
-    if (!course) return;
+    if (!course) {
+      console.log('No course found');
+      return;
+    }
 
-    const success = await enroll(course.id);
-    if (success) {
-      // Track enrollment
-      trackCourseEnrollment(course.id, course.title, finalPrice);
-      // Refetch enrollment data
-      window.location.reload();
+    console.log('Checking existing enrollment for user:', user.id, 'course:', course.id);
+
+    // Check if user has already submitted enrollment for this course
+    try {
+      const { data: existingSubmission, error: checkError } = await supabase
+        .from('enrollment_submissions')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('course_id', course.id)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking enrollment:', checkError);
+        // Still allow enrollment if check fails
+        setShowEnrollmentForm(true);
+        return;
+      }
+
+      if (existingSubmission) {
+        console.log('Found existing submission:', existingSubmission);
+        toast.info(`You have already submitted an enrollment form for this course. Status: ${existingSubmission.status}`);
+        return;
+      }
+      
+      console.log('No existing submission found, opening enrollment form');
+      setShowEnrollmentForm(true);
+    } catch (error: any) {
+      console.error('Unexpected error in handleEnroll:', error);
+      // Always allow enrollment if there's an unexpected error
+      setShowEnrollmentForm(true);
     }
   };
 
@@ -143,7 +203,7 @@ const CourseDetail = () => {
     );
   }
 
-  const isEnrolled = !!enrollment;
+  const isEnrolled = enrollmentStatus?.isEnrolled;
   const finalPrice = course.price_offer || course.price_regular;
 
   return (
@@ -413,11 +473,13 @@ const CourseDetail = () => {
                     {user ? (
                       <Button 
                         onClick={handleEnroll}
-                        disabled={isEnrolling}
                         className="w-full" 
                         size="lg"
+                        disabled={enrollmentStatus?.hasSubmitted}
                       >
-                        {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
+                        {enrollmentStatus?.hasSubmitted 
+                          ? `Application ${enrollmentStatus.status}` 
+                          : 'Enroll Now'}
                       </Button>
                     ) : (
                       <Button 
@@ -439,6 +501,18 @@ const CourseDetail = () => {
           </div>
         </div>
       </main>
+
+      {/* Enrollment Form Modal */}
+      <EnrollmentForm
+        courseId={course?.id || ''}
+        course={course}
+        isOpen={showEnrollmentForm}
+        onClose={() => setShowEnrollmentForm(false)}
+        onSuccess={() => {
+          // Refetch enrollment status after successful submission
+          queryClient.invalidateQueries({ queryKey: ['enrollment-status', course?.id] });
+        }}
+      />
       <Footer />
     </>
   );
