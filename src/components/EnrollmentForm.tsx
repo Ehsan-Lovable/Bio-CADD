@@ -65,6 +65,9 @@ const createFormSchema = (fields: FormField[]) => {
   return z.object(schemaObject);
 };
 
+// Create a type for the form data
+type FormData = Record<string, any>;
+
 export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
   courseId,
   course,
@@ -95,12 +98,12 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
   // Create dynamic form schema based on fields
   const formSchema = formFields ? createFormSchema(formFields) : z.object({});
   
-  const form = useForm({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {}
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormData) => {
     if (!session) {
       toast.error('Please sign in to enroll in this course');
       return;
@@ -144,7 +147,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       <FormField
         key={field.id}
         control={form.control}
-        name={field_name as any}
+        name={field_name}
         render={({ field: formField }) => (
           <FormItem>
             <FormLabel className="flex items-center gap-1">
