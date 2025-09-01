@@ -6,14 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DataTable } from '@/components/DataTable';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminLessons() {
   const queryClient = useQueryClient();
-  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [lessonToDelete, setLessonToDelete] = useState<any>(null);
   const [editingLesson, setEditingLesson] = useState<any>(null);
@@ -44,7 +44,7 @@ export default function AdminLessons() {
         `)
         .order('order', { ascending: true });
 
-      if (selectedCourseId) {
+      if (selectedCourseId && selectedCourseId !== 'all') {
         query = query.eq('course_id', selectedCourseId);
       }
 
@@ -101,6 +101,24 @@ export default function AdminLessons() {
     }
   });
 
+  const handleSaveLesson = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLesson) return;
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const lessonData = {
+      ...editingLesson,
+      title: formData.get('title') as string,
+      course_id: formData.get('course_id') as string,
+      video_url: formData.get('video_url') as string,
+      order: parseInt(formData.get('order') as string) || 0,
+      duration_minutes: parseInt(formData.get('duration_minutes') as string) || null,
+      is_preview: formData.get('is_preview') === 'true'
+    };
+
+    saveMutation.mutate(lessonData);
+  };
+
   const columns = [
     {
       key: 'title' as const,
@@ -150,24 +168,6 @@ export default function AdminLessons() {
     }
   ];
 
-  const handleSaveLesson = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingLesson) return;
-
-    const formData = new FormData(e.target as HTMLFormElement);
-    const lessonData = {
-      ...editingLesson,
-      title: formData.get('title') as string,
-      course_id: formData.get('course_id') as string,
-      video_url: formData.get('video_url') as string,
-      order: parseInt(formData.get('order') as string) || 0,
-      duration_minutes: parseInt(formData.get('duration_minutes') as string) || null,
-      is_preview: formData.get('is_preview') === 'true'
-    };
-
-    saveMutation.mutate(lessonData);
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -187,7 +187,7 @@ export default function AdminLessons() {
               <SelectValue placeholder="All courses" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All courses</SelectItem>
+              <SelectItem value="all">All courses</SelectItem>
               {courses?.map((course) => (
                 <SelectItem key={course.id} value={course.id}>
                   {course.title}
@@ -208,7 +208,7 @@ export default function AdminLessons() {
       />
 
       {/* Edit/Create Lesson Dialog */}
-      {editingLesson && (
+      {editingLesson && courses && courses.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <form onSubmit={handleSaveLesson} className="p-6 space-y-4">
@@ -227,12 +227,16 @@ export default function AdminLessons() {
 
               <div>
                 <Label htmlFor="course_id">Course *</Label>
-                <Select name="course_id" defaultValue={editingLesson.course_id || ''} required>
+                <Select 
+                  name="course_id" 
+                  defaultValue={editingLesson.course_id || selectedCourseId || courses[0]?.id} 
+                  required
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select course" />
                   </SelectTrigger>
                   <SelectContent>
-                    {courses?.map((course) => (
+                    {courses.map((course) => (
                       <SelectItem key={course.id} value={course.id}>
                         {course.title}
                       </SelectItem>

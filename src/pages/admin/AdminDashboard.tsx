@@ -1,13 +1,20 @@
 import { useOptimizedAdminData } from '@/hooks/useOptimizedAdminData';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatCard } from '@/components/StatCard';
+import { Badge } from '@/components/ui/badge';
 import { 
   Users, 
   BookOpen, 
   Upload, 
   TrendingUp,
   Calendar,
-  Clock
+  Clock,
+  Video,
+  FileText,
+  Briefcase,
+  CheckCircle,
+  AlertCircle,
+  Play
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -18,7 +25,7 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i} className="h-32 animate-pulse bg-muted" />
           ))}
         </div>
@@ -29,14 +36,17 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Overview of your bioinformatics platform</p>
+        </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Clock className="h-4 w-4" />
           Last updated: {new Date().toLocaleTimeString()}
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* Main KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           icon={Users}
@@ -80,6 +90,116 @@ export default function AdminDashboard() {
         />
       </div>
 
+      {/* Additional Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Lessons</CardTitle>
+            <Video className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.totalLessons || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              +{stats?.recentLessons || 0} this week
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Resources</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.totalResources || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              +{stats?.recentResources || 0} this week
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Portfolio</CardTitle>
+            <Briefcase className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.totalPortfolio || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Total projects
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Students</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.activeUsers || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Enrolled students
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Status Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              Course Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Published</span>
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                {stats?.publishedCourses || 0}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Draft</span>
+              <Badge variant="secondary">
+                {stats?.draftCourses || 0}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Total</span>
+              <Badge variant="outline">
+                {stats?.totalCourses || 0}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              Submissions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Pending</span>
+              <Badge variant="destructive">
+                {stats?.pendingSubmissions || 0}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Total</span>
+              <Badge variant="outline">
+                {stats?.totalSubmissions || 0}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Recent Activity */}
       <Card className="p-6">
         <div className="flex items-center gap-2 mb-4">
@@ -91,17 +211,16 @@ export default function AdminDashboard() {
           <div className="space-y-3">
             {recentActivity.map((activity, index) => (
               <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <div className={`
-                  w-2 h-2 rounded-full 
-                  ${activity.type === 'user_registered' ? 'bg-green-500' : 
-                    activity.type === 'course_created' ? 'bg-blue-500' : 'bg-orange-500'}
-                `} />
+                <div className="text-lg">{activity.icon}</div>
                 <div className="flex-1">
                   <p className="text-sm font-medium">{activity.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {new Date(activity.timestamp).toLocaleString()}
                   </p>
                 </div>
+                <Badge variant="outline" className="text-xs capitalize">
+                  {activity.type.replace('_', ' ')}
+                </Badge>
               </div>
             ))}
           </div>

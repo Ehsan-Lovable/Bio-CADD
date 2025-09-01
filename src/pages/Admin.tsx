@@ -14,7 +14,9 @@ import {
   Upload,
   Menu,
   X,
-  Briefcase
+  Briefcase,
+  Calendar,
+  FileText as BlogIcon
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -24,9 +26,11 @@ import AdminCourses from './admin/AdminCourses';
 import AdminPortfolio from './admin/AdminPortfolio';
 import AdminLessons from './admin/AdminLessons';
 import AdminResources from './admin/AdminResources';
-import AdminDFTSubmissions from './admin/AdminDFTSubmissions';
+import AdminSubmissions from './admin/AdminSubmissions';
 import AdminUsers from './admin/AdminUsers';
 import AdminSiteSettings from './admin/AdminSiteSettings';
+import AdminUpcomingSessions from './admin/AdminUpcomingSessions';
+import AdminBlog from './admin/AdminBlog';
 
 const sidebarItems = [
   { 
@@ -56,7 +60,7 @@ const sidebarItems = [
     icon: FileText 
   },
   { 
-    name: 'DFT Submissions', 
+    name: 'Submissions', 
     path: '/admin/submissions', 
     icon: Upload 
   },
@@ -69,6 +73,21 @@ const sidebarItems = [
     name: 'Site Settings', 
     path: '/admin/settings', 
     icon: Settings 
+  },
+  { 
+    name: 'Upcoming Sessions', 
+    path: '/admin/upcoming-sessions', 
+    icon: Calendar 
+  },
+  { 
+    name: 'Blog Management', 
+    path: '/admin/blog', 
+    icon: BlogIcon 
+  },
+  { 
+    name: 'TEST ITEM', 
+    path: '/admin/test', 
+    icon: FileText 
   }
 ];
 
@@ -186,9 +205,11 @@ export default function Admin() {
             <Route path="portfolio/*" element={<AdminPortfolio />} />
             <Route path="lessons/*" element={<AdminLessons />} />
             <Route path="resources/*" element={<AdminResources />} />
-            <Route path="submissions" element={<AdminDFTSubmissions />} />
+            <Route path="submissions" element={<AdminSubmissions />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="settings" element={<AdminSiteSettings />} />
+            <Route path="upcoming-sessions" element={<AdminUpcomingSessions />} />
+            <Route path="blog/*" element={<AdminBlog />} />
           </Routes>
         </div>
       </main>

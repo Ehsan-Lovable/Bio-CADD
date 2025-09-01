@@ -8,6 +8,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ProjectCardSkeleton } from '@/components/site/LoadingSkeletons';
 import { getPublishedProjects } from '@/lib/queries/portfolio';
 import { SEOHead } from '@/components/SEOHead';
+import { Header } from '@/components/Header';
 import { toast } from 'sonner';
 
 interface PortfolioProject {
@@ -159,9 +160,13 @@ export function PortfolioList() {
     <ErrorBoundary>
       <div className="min-h-screen bg-background">
         <SEOHead 
-          title="Portfolio | Our Work"
-          description="Explore our portfolio of successful projects across various industries and technologies."
+          title="Our Portfolio - Innovative Projects & Digital Solutions"
+          description="Explore our portfolio of successful projects, from web applications to digital solutions. See how we've helped clients achieve their goals."
+          type="website"
+          tags={['portfolio', 'projects', 'web development', 'digital solutions', 'case studies']}
         />
+
+        <Header />
 
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-background to-accent/20 py-20 border-b">

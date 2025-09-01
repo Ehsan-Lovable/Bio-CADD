@@ -20,7 +20,7 @@ import {
 
 interface Column<T> {
   key: keyof T;
-  header: string;
+  header: string | React.ReactNode;
   render?: (value: any, row: T) => React.ReactNode;
   sortable?: boolean;
 }
@@ -29,6 +29,7 @@ interface Action<T> {
   label: string;
   onClick: (row: T) => void;
   variant?: 'default' | 'destructive';
+  icon?: React.ComponentType<any> | ((row: T) => React.ComponentType<any>);
 }
 
 interface DataTableProps<T> {
@@ -41,6 +42,11 @@ interface DataTableProps<T> {
   isLoading?: boolean;
   emptyMessage?: string;
   className?: string;
+  pagination?: {
+    pageSize?: number;
+    showSizeChanger?: boolean;
+    showQuickJumper?: boolean;
+  };
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -52,10 +58,12 @@ export function DataTable<T extends Record<string, any>>({
   itemsPerPage = 10,
   isLoading = false,
   emptyMessage = "No data available",
-  className
+  className,
+  pagination
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(pagination?.pageSize || itemsPerPage);
   const [sortConfig, setSortConfig] = useState<{
     key: keyof T;
     direction: 'asc' | 'desc';
@@ -86,9 +94,9 @@ export function DataTable<T extends Record<string, any>>({
     : filteredData;
 
   // Paginate data
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.ceil(sortedData.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedData = sortedData.slice(startIndex, startIndex + pageSize);
 
   const handleSort = (key: keyof T) => {
     if (sortConfig?.key === key) {
@@ -214,7 +222,7 @@ export function DataTable<T extends Record<string, any>>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between p-4 border-t">
           <p className="text-sm text-muted-foreground">
-            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, sortedData.length)} of {sortedData.length} results
+            Showing {startIndex + 1} to {Math.min(startIndex + pageSize, sortedData.length)} of {sortedData.length} results
           </p>
           <div className="flex items-center gap-2">
             <Button

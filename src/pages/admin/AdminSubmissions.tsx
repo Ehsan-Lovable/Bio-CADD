@@ -1,0 +1,526 @@
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DataTable } from '@/components/DataTable';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Download, Eye, Users, BookOpen, Calendar } from 'lucide-react';
+
+export default function AdminSubmissions() {
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [courseFilter, setCourseFilter] = useState('all');
+  const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
+
+  // Fetch courses for filtering
+  const { data: courses } = useQuery({
+    queryKey: ['courses-for-submissions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('id, title, course_type, status, start_date')
+        .order('title');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch submissions with enhanced filtering
+  const { data: submissions, isLoading } = useQuery({
+    queryKey: ['admin-submissions', statusFilter, courseFilter],
+    queryFn: async () => {
+      let query = supabase
+        .from('dft_submissions')
+        .select(`
+          *,
+          profiles(full_name, phone),
+          courses(title, course_type, start_date)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (statusFilter && statusFilter !== 'all') {
+        query = query.eq('status', statusFilter);
+      }
+
+      if (courseFilter && courseFilter !== 'all') {
+        query = query.eq('course_id', courseFilter);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Get course type for selected course
+  const selectedCourse = courses?.find(c => c.id === courseFilter);
+  const isLiveCourse = selectedCourse?.course_type === 'live';
+
+  // Group submissions by course for statistics
+  const submissionsByCourse = submissions?.reduce((acc, submission) => {
+    const courseTitle = submission.courses?.title || 'Unknown Course';
+    if (!acc[courseTitle]) {
+      acc[courseTitle] = {
+        total: 0,
+        submitted: 0,
+        approved: 0,
+        rejected: 0,
+        courseType: submission.courses?.course_type || 'unknown'
+      };
+    }
+    acc[courseTitle].total++;
+    
+    switch (submission.status) {
+      case 'submitted':
+        acc[courseTitle].submitted++;
+        break;
+      case 'approved':
+        acc[courseTitle].approved++;
+        break;
+      case 'rejected':
+        acc[courseTitle].rejected++;
+        break;
+    }
+    return acc;
+  }, {} as Record<string, any>) || {};
+
+  const exportToCSV = () => {
+    if (!submissions || submissions.length === 0) {
+      return;
+    }
+
+    const csvHeaders = [
+      'ID',
+      'Student Name',
+      'Phone',
+      'Course',
+      'Status',
+      'Submission Link',
+      'Created At'
+    ];
+
+    const csvData = submissions.map(submission => [
+      submission.id,
+      submission.profiles?.full_name || 'N/A',
+      submission.profiles?.phone || 'N/A',
+      submission.courses?.title || 'N/A',
+      submission.status,
+      submission.submission_link || 'N/A',
+      new Date(submission.created_at).toLocaleDateString()
+    ]);
+
+    const csvContent = [csvHeaders, ...csvData]
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `submissions_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const columns = [
+    {
+      key: 'profiles.full_name' as const,
+      header: 'Student Name',
+      render: (value: string, row: any) => (
+        <div className="font-medium text-gray-900">
+          {row.profiles?.full_name || 'N/A'}
+        </div>
+      )
+    },
+    {
+      key: 'profiles.phone' as const,
+      header: 'Phone',
+      render: (value: string, row: any) => (
+        <div className="text-sm text-gray-700">
+          {row.profiles?.phone || 'N/A'}
+        </div>
+      )
+    },
+    {
+      key: 'courses.title' as const,
+      header: 'Course',
+      render: (value: string, row: any) => (
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-4 w-4 text-gray-500" />
+          <div>
+            <div className="font-medium text-gray-900">
+              {row.courses?.title || 'N/A'}
+            </div>
+            <div className="text-xs text-gray-500">
+              {row.courses?.course_type === 'live' ? (
+                <span className="text-violet-600">Live Course</span>
+              ) : (
+                <span className="text-blue-600">Recorded Course</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'status' as const,
+      header: 'Status',
+      render: (value: string) => (
+        <Badge variant={
+          value === 'approved' ? 'default' : 
+          value === 'submitted' ? 'secondary' : 
+          'destructive'
+        }>
+          {value}
+        </Badge>
+      )
+    },
+    {
+      key: 'submission_link' as const,
+      header: 'Submission',
+      render: (value: string) => (
+        <div className="text-sm">
+          {value ? (
+            <a 
+              href={value} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              View Submission
+            </a>
+          ) : (
+            <span className="text-gray-500">No link</span>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'created_at' as const,
+      header: 'Submitted',
+      render: (value: string) => (
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-gray-500" />
+          <span className="text-sm text-gray-700">
+            {new Date(value).toLocaleDateString()}
+          </span>
+        </div>
+      )
+    }
+  ];
+
+  const actions = [
+    {
+      label: 'View Details',
+      icon: <Eye className="h-4 w-4" />,
+      onClick: (submission: any) => setSelectedSubmission(submission)
+    }
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Submissions</h1>
+          <p className="text-muted-foreground">Manage course submissions and participant information</p>
+          <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Course-Based Submission System:</strong> Submissions are now organized by course type. 
+              Live courses support batch-based enrollment with limited seats, while recorded courses offer unlimited access.
+            </p>
+          </div>
+        </div>
+        <Button onClick={exportToCSV} disabled={!submissions || submissions.length === 0}>
+          <Download className="h-4 w-4 mr-2" />
+          Export CSV
+        </Button>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Submissions</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{submissions?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Across all courses
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Live Courses</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {courses?.filter(c => c.course_type === 'live').length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              With batch support
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Recorded Courses</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {courses?.filter(c => c.course_type === 'recorded').length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Unlimited access
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {submissions?.filter(s => s.status === 'submitted').length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Awaiting approval
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Submissions by Course */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Submissions by Course</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {Object.entries(submissionsByCourse).map(([courseTitle, stats]) => (
+              <div key={courseTitle} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <BookOpen className="h-5 w-5 text-gray-600" />
+                  <div>
+                    <div className="font-medium text-gray-900">{courseTitle}</div>
+                    <div className="text-sm text-gray-600">
+                      {stats.courseType === 'live' ? (
+                        <span className="text-violet-600">Live Course</span>
+                      ) : (
+                        <span className="text-blue-600">Recorded Course</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-900">{stats.total}</div>
+                    <div className="text-xs text-gray-600">Total</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-blue-600">{stats.submitted}</div>
+                    <div className="text-xs text-gray-600">Submitted</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-green-600">{stats.approved}</div>
+                    <div className="text-xs text-gray-600">Approved</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-red-600">{stats.rejected}</div>
+                    <div className="text-xs text-gray-600">Rejected</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Enhanced Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Enhanced Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Course</label>
+              <Select value={courseFilter} onValueChange={setCourseFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All courses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All courses</SelectItem>
+                  {courses?.map((course) => (
+                    <SelectItem key={course.id} value={course.id}>
+                      {course.title} ({course.course_type})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Status</label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="submitted">Submitted</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Course Type Information */}
+      {selectedCourse && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Course Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Course Type</label>
+                <div className="mt-1">
+                  {selectedCourse.course_type === 'live' ? (
+                    <Badge variant="default" className="text-xs">
+                      Live Course
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-xs">
+                      Recorded Course
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Start Date</label>
+                <div className="mt-1 text-sm text-gray-600">
+                  {selectedCourse.start_date ? 
+                    new Date(selectedCourse.start_date).toLocaleDateString() : 
+                    'Not set'
+                  }
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <DataTable
+        data={submissions || []}
+        columns={columns}
+        actions={actions}
+        isLoading={isLoading}
+        searchPlaceholder="Search submissions..."
+        emptyMessage="No submissions found"
+      />
+
+      {/* Submission Details Modal */}
+      {selectedSubmission && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-xl font-bold mb-4">Submission Details</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Student Name</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {selectedSubmission.profiles?.full_name || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Phone</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {selectedSubmission.profiles?.phone || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Course</label>
+                  <div className="mt-1">
+                    <div className="text-sm text-gray-900">
+                      {selectedSubmission.courses?.title || 'N/A'}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {selectedSubmission.courses?.course_type === 'live' ? (
+                        <span className="text-violet-600">Live Course</span>
+                      ) : (
+                        <span className="text-blue-600">Recorded Course</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Status</label>
+                  <div className="mt-1">
+                    <Badge variant={
+                      selectedSubmission.status === 'approved' ? 'default' : 
+                      selectedSubmission.status === 'submitted' ? 'secondary' : 
+                      'destructive'
+                    }>
+                      {selectedSubmission.status}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Submission Link</label>
+                  <div className="mt-1">
+                    {selectedSubmission.submission_link ? (
+                      <a 
+                        href={selectedSubmission.submission_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline text-sm"
+                      >
+                        View Submission
+                      </a>
+                    ) : (
+                      <span className="text-gray-500 text-sm">No link provided</span>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Submitted At</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {new Date(selectedSubmission.created_at).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6">
+                <Button 
+                  variant="outline"
+                  onClick={() => setSelectedSubmission(null)}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}

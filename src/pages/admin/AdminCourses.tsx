@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Routes, Route, Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,7 +13,22 @@ import { DataTable } from '@/components/DataTable';
 import { FileUpload } from '@/components/FileUpload';
 import { StringRepeatableList, RoadmapRepeatableList } from '@/components/RepeatableList';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Eye, 
+  EyeOff, 
+  Copy, 
+  Filter, 
+  Download, 
+  Upload, 
+  Archive,
+  RefreshCw,
+  Search,
+  MoreHorizontal
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminCoursesIndex = () => {
@@ -21,8 +36,14 @@ const AdminCoursesIndex = () => {
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState<any>(null);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
-  const { data: courses, isLoading } = useQuery({
+  const { data: courses, isLoading, refetch } = useQuery({
     queryKey: ['admin-courses'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -32,6 +53,99 @@ const AdminCoursesIndex = () => {
       
       if (error) throw error;
       return data || [];
+    }
+  });
+
+  // Filter and search courses
+  const filteredCourses = useMemo(() => {
+    if (!courses) return [];
+    
+    return courses.filter(course => {
+      const matchesStatus = filterStatus === 'all' || course.status === filterStatus;
+      const matchesType = filterType === 'all' || course.course_type === filterType;
+      const matchesSearch = searchQuery === '' || 
+        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        course.slug.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return matchesStatus && matchesType && matchesSearch;
+    });
+  }, [courses, filterStatus, filterType, searchQuery]);
+
+  // Bulk operations
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (courseIds: string[]) => {
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .in('id', courseIds);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
+      toast.success(`${selectedCourses.length} courses deleted successfully`);
+      setBulkDeleteDialogOpen(false);
+      setSelectedCourses([]);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to delete courses');
+    }
+  });
+
+  const bulkStatusMutation = useMutation({
+    mutationFn: async ({ courseIds, newStatus }: { courseIds: string[]; newStatus: 'draft' | 'published' | 'archived' }) => {
+      const { error } = await supabase
+        .from('courses')
+        .update({ status: newStatus })
+        .in('id', courseIds);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
+      toast.success(`Status updated for ${selectedCourses.length} courses`);
+      setSelectedCourses([]);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to update course status');
+    }
+  });
+
+  const duplicateMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      // Get the original course
+      const { data: originalCourse, error: fetchError } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('id', courseId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      // Create a duplicate with modified title and slug
+      const duplicateData = {
+        ...originalCourse,
+        id: undefined,
+        title: `${originalCourse.title} (Copy)`,
+        slug: `${originalCourse.slug}-copy-${Date.now()}`,
+        status: 'draft' as const,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      const { error: insertError } = await supabase
+        .from('courses')
+        .insert(duplicateData);
+      
+      if (insertError) throw insertError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
+      toast.success('Course duplicated successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to duplicate course');
     }
   });
 
@@ -75,6 +189,33 @@ const AdminCoursesIndex = () => {
 
   const columns = [
     {
+      key: 'select' as const,
+      header: (
+        <Checkbox
+          checked={selectedCourses.length === filteredCourses.length && filteredCourses.length > 0}
+          onCheckedChange={(checked) => {
+            if (checked) {
+              setSelectedCourses(filteredCourses.map(c => c.id));
+            } else {
+              setSelectedCourses([]);
+            }
+          }}
+        />
+      ),
+      render: (value: any, course: any) => (
+        <Checkbox
+          checked={selectedCourses.includes(course.id)}
+          onCheckedChange={(checked) => {
+            if (checked) {
+              setSelectedCourses(prev => [...prev, course.id]);
+            } else {
+              setSelectedCourses(prev => prev.filter(id => id !== course.id));
+            }
+          }}
+        />
+      )
+    },
+    {
       key: 'title' as const,
       header: 'Title',
       sortable: true,
@@ -82,28 +223,24 @@ const AdminCoursesIndex = () => {
         <div>
           <p className="font-medium">{value}</p>
           <p className="text-xs text-muted-foreground">{course.slug}</p>
+          <div className="flex gap-1 mt-1">
+            <Badge variant="outline" className="text-xs">
+              {course.course_type || 'Not set'}
+            </Badge>
+            <Badge variant={course.status === 'published' ? 'default' : 'secondary'} className="text-xs">
+              {course.status}
+            </Badge>
+          </div>
         </div>
       )
     },
     {
-      key: 'course_type' as const,
-      header: 'Type',
+      key: 'description' as const,
+      header: 'Description',
       render: (value: string) => (
-        <span className="capitalize px-2 py-1 rounded text-xs bg-muted">
-          {value || 'Not set'}
-        </span>
-      )
-    },
-    {
-      key: 'status' as const,
-      header: 'Status',
-      render: (value: string) => (
-        <span className={`
-          px-2 py-1 rounded text-xs font-medium
-          ${value === 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
-        `}>
-          {value}
-        </span>
+        <p className="text-sm text-muted-foreground max-w-xs truncate">
+          {value || 'No description'}
+        </p>
       )
     },
     {
@@ -125,6 +262,12 @@ const AdminCoursesIndex = () => {
       )
     },
     {
+      key: 'created_at' as const,
+      header: 'Created',
+      sortable: true,
+      render: (value: string) => new Date(value).toLocaleDateString()
+    },
+    {
       key: 'updated_at' as const,
       header: 'Updated',
       sortable: true,
@@ -134,15 +277,27 @@ const AdminCoursesIndex = () => {
 
   const actions = [
     {
+      label: 'View',
+      onClick: (course: any) => navigate(`/courses/${course.slug}`),
+      icon: Eye
+    },
+    {
       label: 'Edit',
-      onClick: (course: any) => navigate(`/admin/courses/edit/${course.id}`)
+      onClick: (course: any) => navigate(`/admin/courses/edit/${course.id}`),
+      icon: Edit
+    },
+    {
+      label: 'Duplicate',
+      onClick: (course: any) => duplicateMutation.mutate(course.id),
+      icon: Copy
     },
     {
       label: 'Toggle Status',
       onClick: (course: any) => {
         const newStatus = course.status === 'published' ? 'draft' : 'published';
         toggleStatusMutation.mutate({ courseId: course.id, newStatus });
-      }
+      },
+      icon: course => course.status === 'published' ? EyeOff : Eye
     },
     {
       label: 'Delete',
@@ -150,29 +305,208 @@ const AdminCoursesIndex = () => {
         setCourseToDelete(course);
         setDeleteDialogOpen(true);
       },
-      variant: 'destructive' as const
+      variant: 'destructive' as const,
+      icon: Trash2
     }
   ];
 
+  const handleBulkDelete = () => {
+    if (selectedCourses.length === 0) {
+      toast.error('No courses selected');
+      return;
+    }
+    setBulkDeleteDialogOpen(true);
+  };
+
+  const handleBulkStatusChange = (newStatus: 'draft' | 'published' | 'archived') => {
+    if (selectedCourses.length === 0) {
+      toast.error('No courses selected');
+      return;
+    }
+    bulkStatusMutation.mutate({ courseIds: selectedCourses, newStatus });
+  };
+
+  const stats = useMemo(() => {
+    if (!courses) return { total: 0, published: 0, draft: 0, archived: 0 };
+    
+    return {
+      total: courses.length,
+      published: courses.filter(c => c.status === 'published').length,
+      draft: courses.filter(c => c.status === 'draft').length,
+      archived: courses.filter(c => c.status === 'archived').length
+    };
+  }, [courses]);
+
   return (
     <div className="space-y-6">
+      {/* Header with Stats */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Courses</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Courses Management</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your course catalog ({stats.total} total courses)
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => refetch()}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
         <Button onClick={() => navigate('/admin/courses/new')}>
           <Plus className="h-4 w-4 mr-2" />
           New Course
         </Button>
       </div>
+      </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Total Courses</p>
+              <p className="text-2xl font-bold">{stats.total}</p>
+            </div>
+            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-blue-600 text-sm font-bold">{stats.total}</span>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Published</p>
+              <p className="text-2xl font-bold text-green-600">{stats.published}</p>
+            </div>
+            <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-green-600 text-sm font-bold">{stats.published}</span>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Drafts</p>
+              <p className="text-2xl font-bold text-yellow-600">{stats.draft}</p>
+            </div>
+            <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
+              <span className="text-yellow-600 text-sm font-bold">{stats.draft}</span>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Archived</p>
+              <p className="text-2xl font-bold text-gray-600">{stats.archived}</p>
+            </div>
+            <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
+              <span className="text-gray-600 text-sm font-bold">{stats.archived}</span>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Filters and Search */}
+      <Card className="p-4">
+        <div className="flex flex-col lg:flex-row gap-4 items-center">
+          <div className="flex-1 w-full">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search courses by title, description, or slug..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="live">Live</SelectItem>
+                <SelectItem value="recorded">Recorded</SelectItem>
+                <SelectItem value="workshop">Workshop</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </Card>
+
+      {/* Bulk Actions */}
+      {selectedCourses.length > 0 && (
+        <Card className="p-4 bg-blue-50 border-blue-200">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-blue-800">
+              {selectedCourses.length} course(s) selected
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkStatusChange('published')}
+              >
+                Publish All
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkStatusChange('draft')}
+              >
+                Draft All
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkStatusChange('archived')}
+              >
+                Archive All
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkDelete}
+              >
+                Delete All
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Data Table */}
       <DataTable
-        data={courses || []}
+        data={filteredCourses}
         columns={columns}
         actions={actions}
         isLoading={isLoading}
         searchPlaceholder="Search courses..."
         emptyMessage="No courses found"
+        pagination={{
+          pageSize: 20,
+          showSizeChanger: true,
+          showQuickJumper: true
+        }}
       />
 
+      {/* Delete Course Dialog */}
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
@@ -180,6 +514,17 @@ const AdminCoursesIndex = () => {
         description={`Are you sure you want to delete "${courseToDelete?.title}"? This action cannot be undone.`}
         confirmText="Delete"
         onConfirm={() => deleteMutation.mutate(courseToDelete.id)}
+        variant="destructive"
+      />
+
+      {/* Bulk Delete Dialog */}
+      <ConfirmDialog
+        open={bulkDeleteDialogOpen}
+        onOpenChange={setBulkDeleteDialogOpen}
+        title="Delete Multiple Courses"
+        description={`Are you sure you want to delete ${selectedCourses.length} course(s)? This action cannot be undone.`}
+        confirmText="Delete All"
+        onConfirm={() => bulkDeleteMutation.mutate(selectedCourses)}
         variant="destructive"
       />
     </div>

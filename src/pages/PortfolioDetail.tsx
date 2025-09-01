@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
+import { Header } from '@/components/Header';
 import { ArrowLeft, MapPin, Clock, DollarSign, Download, ExternalLink, X } from 'lucide-react';
 
 interface PortfolioProject {
@@ -164,6 +165,8 @@ export default function PortfolioDetail() {
         description={project.summary || `Case study: ${project.title}`}
         image={project.hero_image_url}
       />
+
+      <Header />
 
       <div className="min-h-screen bg-background">
         {/* Hero Section */}

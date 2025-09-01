@@ -69,48 +69,48 @@ export function SearchCommand() {
     <>
       <Button
         variant="outline"
-        className="relative h-9 w-9 p-0 xl:h-10 xl:w-60 xl:justify-start xl:px-3 xl:py-2"
+        className="relative h-9 w-9 p-0 xl:h-10 xl:w-60 xl:justify-start xl:px-3 xl:py-2 border-violet-200 hover:border-violet-300 hover:bg-violet-50 transition-all duration-300 group"
         onClick={() => setOpen(true)}
       >
-        <Search className="h-4 w-4 xl:mr-2" />
-        <span className="hidden xl:inline-flex">Search...</span>
-        <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex">
+        <Search className="h-4 w-4 xl:mr-2 text-violet-600 group-hover:text-violet-700 transition-colors duration-300" />
+        <span className="hidden xl:inline-flex text-violet-700 group-hover:text-violet-800 transition-colors duration-300">Search...</span>
+        <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-6 select-none items-center gap-1 rounded border bg-violet-50 border-violet-200 px-1.5 font-mono text-[10px] font-medium text-violet-700 opacity-100 xl:flex">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Search pages and courses..." />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+      <CommandDialog open={open} onOpenChange={setOpen} className="border-violet-200">
+        <CommandInput placeholder="Search pages and courses..." className="border-violet-200 focus:border-violet-400" />
+        <CommandList className="bg-white">
+          <CommandEmpty className="text-violet-600">No results found.</CommandEmpty>
           
-          <CommandGroup heading="Pages">
+          <CommandGroup heading="Pages" className="text-violet-700">
             {pages.map((page) => (
-              <CommandItem key={page.path} onSelect={() => handleSelect(page.path)}>
-                <page.icon className="mr-2 h-4 w-4" />
+              <CommandItem 
+                key={page.path} 
+                onSelect={() => handleSelect(page.path)}
+                className="hover:bg-violet-50 text-violet-700 hover:text-violet-800 transition-colors duration-200"
+              >
+                <page.icon className="mr-2 h-4 w-4 text-violet-600" />
                 {page.name}
               </CommandItem>
             ))}
           </CommandGroup>
 
           {courses && courses.length > 0 && (
-            <CommandGroup heading="Courses">
+            <CommandGroup heading="Courses" className="text-violet-700">
               {courses.slice(0, 8).map((course) => (
-                <CommandItem key={course.id} onSelect={() => handleSelect(`/courses/${course.slug}`)}>
-                  <BookOpen className="mr-2 h-4 w-4" />
+                <CommandItem 
+                  key={course.id} 
+                  onSelect={() => handleSelect(`/courses/${course.slug}`)}
+                  className="hover:bg-violet-50 text-violet-700 hover:text-violet-800 transition-colors duration-200"
+                >
+                  <BookOpen className="mr-2 h-4 w-4 text-violet-600" />
                   <div className="flex flex-col">
-                    <span>{course.title}</span>
-                    <span className="text-xs text-muted-foreground capitalize">
-                      {course.course_type || 'Course'}
-                    </span>
+                    <span className="font-medium">{course.title}</span>
+                    <span className="text-xs text-violet-500 capitalize">{course.course_type}</span>
                   </div>
                 </CommandItem>
               ))}
-              {courses.length > 8 && (
-                <CommandItem onSelect={() => handleSelect('/courses')}>
-                  <Search className="mr-2 h-4 w-4" />
-                  View all {courses.length} courses...
-                </CommandItem>
-              )}
             </CommandGroup>
           )}
         </CommandList>
