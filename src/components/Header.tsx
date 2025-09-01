@@ -2,7 +2,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { signOut } from '@/lib/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Settings, LogOut, Shield, Sparkles } from 'lucide-react';
 import { SearchCommand } from '@/components/SearchCommand';
@@ -24,7 +24,7 @@ export function Header() {
   }, []);
 
   const handleSignOut = async () => {
-    await signOut();
+    await supabase.auth.signOut();
     navigate('/');
   };
 
