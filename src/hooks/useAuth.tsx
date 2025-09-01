@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<any | null>(null);
 
   useEffect(() => {
-    // Set up auth state listener first
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -31,15 +31,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Defer profile fetching to prevent deadlocks
         if (session?.user) {
-          setTimeout(() => {
-            supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .maybeSingle()
-              .then(({ data: profile }) => {
-                setUserProfile(profile);
-              });
+          setTimeout(async () => {
+            try {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .maybeSingle();
+              setUserProfile(profile);
+            } catch {
+              setUserProfile(null);
+            }
           }, 0);
         } else {
           setUserProfile(null);
@@ -49,21 +51,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Then get initial session
+    // THEN get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
-      // Fetch initial profile if user exists
       if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .maybeSingle()
-          .then(({ data: profile }) => {
+        setTimeout(async () => {
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .maybeSingle();
             setUserProfile(profile);
-          });
+          } catch {
+            setUserProfile(null);
+          }
+        }, 0);
       }
       
       setLoading(false);
