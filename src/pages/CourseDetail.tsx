@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useEnrollment } from '@/hooks/useEnrollment';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,6 @@ import {
   Target,
   Zap
 } from 'lucide-react';
-import { toast } from 'sonner';
 
 const CourseDetailSkeleton = () => (
   <LoadingState type="page" className="max-w-6xl mx-auto" />
@@ -38,6 +38,7 @@ const CourseDetail = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { trackCourseView, trackCourseEnrollment } = useAnalytics();
+  const { enroll, isEnrolling } = useEnrollment();
 
   const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ['course-detail', slug],
@@ -103,25 +104,12 @@ const CourseDetail = () => {
 
     if (!course) return;
 
-    try {
-      const { error } = await supabase
-        .from('enrollments')
-        .insert({
-          course_id: course.id,
-          user_id: user.id,
-          status: 'active',
-          payment_status: course.price_regular ? 'unpaid' : 'paid'
-        });
-
-      if (error) throw error;
-
+    const success = await enroll(course.id);
+    if (success) {
       // Track enrollment
       trackCourseEnrollment(course.id, course.title, finalPrice);
-      toast.success('Successfully enrolled in the course!');
       // Refetch enrollment data
       window.location.reload();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to enroll in course');
     }
   };
 
@@ -425,10 +413,11 @@ const CourseDetail = () => {
                     {user ? (
                       <Button 
                         onClick={handleEnroll}
+                        disabled={isEnrolling}
                         className="w-full" 
                         size="lg"
                       >
-                        Enroll Now
+                        {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
                       </Button>
                     ) : (
                       <Button 
