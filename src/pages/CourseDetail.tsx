@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { LoadingState } from '@/components/LoadingState';
 import { SEOHead } from '@/components/SEOHead';
+import { MarkdownViewer } from '@/components/MarkdownViewer';
 import { useAnalytics } from '@/lib/analytics';
 import { toast } from 'sonner';
 import { 
@@ -264,9 +265,12 @@ const CourseDetail = () => {
 
               {/* Course title and description */}
               <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-              <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                {course.description}
-              </p>
+              <div className="mb-6">
+                <MarkdownViewer 
+                  content={course.description || ''} 
+                  className="text-lg leading-relaxed"
+                />
+              </div>
 
               {/* Meta information */}
               <div className="flex flex-wrap gap-4 mb-8">

@@ -5,6 +5,7 @@ import { BookOpen, Clock, Award, Users, Play, Star } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useGatedContent } from '@/hooks/useGatedContent';
 import { useAuth } from '@/hooks/useAuth';
+import { MarkdownViewer } from '@/components/MarkdownViewer';
 
 interface CourseCardProps {
   course: {
@@ -78,9 +79,12 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
           </div>
           
           {course.description && (
-            <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-              {course.description}
-            </p>
+            <div className="text-muted-foreground text-sm mb-4 line-clamp-2">
+              <MarkdownViewer 
+                content={course.description} 
+                className="text-sm [&>p]:mb-1 [&>h1]:text-sm [&>h2]:text-sm [&>h3]:text-sm [&>strong]:font-medium"
+              />
+            </div>
           )}
           
           <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
