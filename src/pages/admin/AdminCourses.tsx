@@ -839,6 +839,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, time_24h: e.target.value }))}
                   placeholder="e.g., 19:00"
                 />
+                <p className="text-sm text-muted-foreground mt-1">UTC +6 timezone will be displayed to public</p>
               </div>
               
               <div>
@@ -868,24 +869,28 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
             <h3 className="text-lg font-semibold mb-4">Pricing</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="price_regular">Regular Price (৳)</Label>
+                <Label htmlFor="price_regular">Regular Price ($)</Label>
                 <Input
                   id="price_regular"
                   type="number"
+                  step="0.01"
+                  min="0"
                   value={formData.price_regular}
                   onChange={(e) => setFormData(prev => ({ ...prev, price_regular: e.target.value }))}
-                  placeholder="0"
+                  placeholder="29.99"
                 />
               </div>
               
               <div>
-                <Label htmlFor="price_offer">Offer Price (৳)</Label>
+                <Label htmlFor="price_offer">Offer Price ($)</Label>
                 <Input
                   id="price_offer"
                   type="number"
+                  step="0.01"
+                  min="0"
                   value={formData.price_offer}
                   onChange={(e) => setFormData(prev => ({ ...prev, price_offer: e.target.value }))}
-                  placeholder="0"
+                  placeholder="19.99"
                 />
               </div>
             </div>

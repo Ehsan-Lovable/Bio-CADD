@@ -87,6 +87,7 @@ export type Database = {
           description: string | null
           difficulty: string | null
           duration_text: string | null
+          featured: boolean | null
           id: string
           language: string | null
           module_count: number | null
@@ -114,6 +115,7 @@ export type Database = {
           description?: string | null
           difficulty?: string | null
           duration_text?: string | null
+          featured?: boolean | null
           id?: string
           language?: string | null
           module_count?: number | null
@@ -141,6 +143,7 @@ export type Database = {
           description?: string | null
           difficulty?: string | null
           duration_text?: string | null
+          featured?: boolean | null
           id?: string
           language?: string | null
           module_count?: number | null
