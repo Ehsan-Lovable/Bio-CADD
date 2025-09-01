@@ -116,8 +116,8 @@ export const useOptimizedAdminData = () => {
             .limit(2),
           supabase
             .from('lessons')
-            .select('title, created_at')
-            .order('created_at', { ascending: false })
+            .select('title')
+            .order('id', { ascending: false })
             .limit(2),
           supabase
             .from('portfolio_projects')
@@ -158,8 +158,8 @@ export const useOptimizedAdminData = () => {
         if (recentLessons?.data) {
           activities.push(...recentLessons.data.map(lesson => ({
             type: 'lesson_created',
-            title: `Lesson "${lesson.title}" was created`,
-            timestamp: lesson.created_at,
+            title: `Lesson "${lesson.title}" was added`,
+            timestamp: new Date().toISOString(), // Use current timestamp since lessons don't have created_at
             icon: '🎥'
           })));
         }

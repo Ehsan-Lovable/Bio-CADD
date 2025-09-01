@@ -77,7 +77,7 @@ export function SearchCommand() {
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen} className="border-violet-200">
+      <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Search pages and courses..." className="border-violet-200 focus:border-violet-400" />
         <CommandList className="bg-white">
           <CommandEmpty className="text-violet-600">No results found.</CommandEmpty>

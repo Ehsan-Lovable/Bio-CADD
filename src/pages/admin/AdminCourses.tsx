@@ -602,6 +602,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
         audience: data.audience || '',
         difficulty: data.difficulty || '',
         module_count: data.module_count?.toString() || '',
+        featured: (data as any).featured || false,
         status: data.status || 'draft'
       });
       
