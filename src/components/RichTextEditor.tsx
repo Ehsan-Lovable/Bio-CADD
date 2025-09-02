@@ -70,7 +70,7 @@ export const RichTextEditor = ({
 
   return (
     <div className={`rich-text-editor ${className}`}>
-      <style jsx global>{`
+      <style>{`
         .rich-text-editor .ql-toolbar {
           border: 1px solid hsl(var(--border));
           border-bottom: none;

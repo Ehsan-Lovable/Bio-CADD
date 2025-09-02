@@ -51,7 +51,7 @@ export const ResizableRichTextEditor = ({
 
   return (
     <div className={`resizable-rich-text-editor group ${className}`} ref={containerRef}>
-      <style jsx global>{`
+      <style>{`
         .resizable-rich-text-editor {
           position: relative;
           border: 1px solid hsl(var(--border));

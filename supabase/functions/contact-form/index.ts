@@ -5,6 +5,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Rate limiting: track submissions by IP
+const submissionTracker = new Map<string, number>()
+const RATE_LIMIT_WINDOW = 60000 // 1 minute
+const MAX_SUBMISSIONS_PER_WINDOW = 3
+
 // Validation schema
 const validateContactMessage = (data: any) => {
   const errors: string[] = []
@@ -31,6 +36,32 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Rate limiting check
+    const clientIP = req.headers.get('cf-connecting-ip') || 
+                     req.headers.get('x-forwarded-for') || 
+                     'unknown';
+    
+    const now = Date.now();
+    const lastSubmission = submissionTracker.get(clientIP) || 0;
+    
+    if (now - lastSubmission < RATE_LIMIT_WINDOW) {
+      const timeLeft = Math.ceil((RATE_LIMIT_WINDOW - (now - lastSubmission)) / 1000);
+      return new Response(
+        JSON.stringify({ 
+          error: `Rate limit exceeded. Please wait ${timeLeft} seconds before submitting again.` 
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    submissionTracker.set(clientIP, now);
+    
+    // Clean up old entries
+    for (const [ip, timestamp] of submissionTracker.entries()) {
+      if (now - timestamp > RATE_LIMIT_WINDOW) {
+        submissionTracker.delete(ip);
+      }
+    }
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
