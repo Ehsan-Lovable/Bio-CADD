@@ -204,7 +204,6 @@ const Upcoming = () => {
 			) : items.length === 0 ? (
 				<div className="text-center py-8">
 					<p className="text-muted-foreground">No upcoming courses available yet. Check back soon!</p>
-					<p className="text-sm text-muted-foreground mt-2">Admin can mark courses as "upcoming" in the admin panel.</p>
 				</div>
 			) : (
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
