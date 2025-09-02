@@ -130,11 +130,11 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
               <div className="flex items-center gap-2">
                 {course.price_offer && course.price_offer < course.price_regular ? (
                   <>
-                    <span className="font-bold text-lg text-primary">৳{course.price_offer}</span>
-                    <span className="text-sm text-muted-foreground line-through">৳{course.price_regular}</span>
+                    <span className="font-bold text-lg text-primary">${course.price_offer}</span>
+                    <span className="text-sm text-muted-foreground line-through">${course.price_regular}</span>
                   </>
                 ) : (
-                  <span className="font-bold text-lg text-primary">৳{course.price_regular}</span>
+                  <span className="font-bold text-lg text-primary">${course.price_regular}</span>
                 )}
               </div>
             )}

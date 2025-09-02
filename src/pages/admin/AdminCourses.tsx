@@ -256,9 +256,9 @@ const AdminCoursesIndex = () => {
         <div>
           {value ? (
             <div>
-              <p className="font-medium">৳{course.price_offer || value}</p>
+              <p className="font-medium">${course.price_offer || value}</p>
               {course.price_offer && course.price_offer < value && (
-                <p className="text-xs text-muted-foreground line-through">৳{value}</p>
+                <p className="text-xs text-muted-foreground line-through">${value}</p>
               )}
             </div>
           ) : (

@@ -427,14 +427,14 @@ const CourseDetail = () => {
                     <div className="flex items-center gap-3 mb-2">
                       {course.price_offer && course.price_offer < course.price_regular ? (
                         <>
-                          <span className="text-3xl font-bold text-primary">৳{course.price_offer}</span>
-                          <span className="text-lg text-muted-foreground line-through">৳{course.price_regular}</span>
+                          <span className="text-3xl font-bold text-primary">${course.price_offer}</span>
+                          <span className="text-lg text-muted-foreground line-through">${course.price_regular}</span>
                           <Badge className="bg-danger text-white">
                             {Math.round(((course.price_regular - course.price_offer) / course.price_regular) * 100)}% OFF
                           </Badge>
                         </>
                       ) : (
-                        <span className="text-3xl font-bold text-primary">৳{course.price_regular}</span>
+                        <span className="text-3xl font-bold text-primary">${course.price_regular}</span>
                       )}
                     </div>
                   ) : (
