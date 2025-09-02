@@ -3,53 +3,126 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.55.0'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 Deno.serve(async (req) => {
+  console.log('Edge Function called:', req.method, req.url)
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    console.log('Handling CORS preflight request')
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    });
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-    )
+    // Get environment variables
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    console.log('Environment check:', {
+      hasUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey
+    })
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing environment variables')
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Get auth token from request
     const authHeader = req.headers.get('Authorization')
+    console.log('Auth header present:', !!authHeader)
+    
     if (!authHeader) {
+      console.log('No authorization header found')
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Authorization header required' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
     // Verify user
     const token = authHeader.replace('Bearer ', '')
+    console.log('Verifying user with token length:', token.length)
+    
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
-    if (authError || !user) {
+    if (authError) {
+      console.error('Auth error:', authError)
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
+    
+    if (!user) {
+      console.log('No user found')
+      return new Response(
+        JSON.stringify({ error: 'User not found' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    console.log('User authenticated:', user.id)
 
     const formData = await req.formData()
     const file = formData.get('file') as File
     const bucket = formData.get('bucket') as string
 
+    console.log('Form data received:', {
+      hasFile: !!file,
+      fileName: file?.name,
+      fileSize: file?.size,
+      bucket: bucket
+    })
+
     if (!file || !bucket) {
+      console.log('Missing file or bucket')
       return new Response(
         JSON.stringify({ error: 'File and bucket are required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (file.size > maxSize) {
+      console.log('File too large:', file.size)
+      return new Response(
+        JSON.stringify({ error: 'File size must be less than 10MB' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
     // Generate unique file name
-    const fileExt = file.name.split('.').pop()
+    const fileExt = file.name.split('.').pop() || 'bin'
     const fileName = `${user.id}/${Date.now()}.${fileExt}`
 
     console.log('Uploading file:', fileName, 'to bucket:', bucket)
@@ -63,19 +136,27 @@ Deno.serve(async (req) => {
       })
 
     if (error) {
-      console.log('Upload error:', error)
+      console.error('Upload error:', error)
       return new Response(
-        JSON.stringify({ error: 'Failed to upload file' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: 'Failed to upload file',
+          details: error.message 
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
+
+    console.log('Upload successful:', data)
 
     // Get public URL
     const { data: publicUrlData } = supabase.storage
       .from(bucket)
       .getPublicUrl(data.path)
 
-    console.log('File uploaded successfully:', publicUrlData.publicUrl)
+    console.log('Public URL generated:', publicUrlData.publicUrl)
 
     return new Response(
       JSON.stringify({ 
@@ -83,14 +164,23 @@ Deno.serve(async (req) => {
         url: publicUrlData.publicUrl,
         path: data.path
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     )
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Unexpected error:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message 
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     )
   }
 })
