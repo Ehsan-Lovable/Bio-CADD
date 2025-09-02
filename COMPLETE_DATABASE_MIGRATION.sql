@@ -17,6 +17,13 @@ VALUES (
 )
 ON CONFLICT (id) DO NOTHING;
 
+-- Drop existing storage policies to avoid conflicts
+DROP POLICY IF EXISTS "Users can upload to own folder" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view own files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update own files" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can view all files" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can delete files" ON storage.objects;
+
 -- Create storage policies for the documents bucket
 
 -- Policy: Users can upload to their own folder
