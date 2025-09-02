@@ -287,23 +287,7 @@ const AdminCoursesIndex = () => {
       onClick: (course: any) => navigate(`/courses/${course.slug}`),
       icon: Eye
     },
-    {
-      label: 'Toggle Upcoming',
-      onClick: async (course: any) => {
-        try {
-          const { error } = await supabase
-            .from('courses')
-            .update({ upcoming: !course.upcoming })
-            .eq('id', course.id);
-          if (error) throw error;
-          queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
-          toast.success(`Course ${!course.upcoming ? 'added to' : 'removed from'} Upcoming`);
-        } catch (e: any) {
-          toast.error(e.message || 'Failed to toggle upcoming');
-        }
-      },
-      icon: MoreHorizontal
-    },
+
     {
       label: 'Edit',
       onClick: (course: any) => navigate(`/admin/courses/edit/${course.id}`),
@@ -581,6 +565,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
     difficulty: '',
     module_count: '',
     featured: false,
+    upcoming: false,
     status: 'draft' as 'draft' | 'published' | 'archived'
   });
 
@@ -621,6 +606,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
         difficulty: data.difficulty || '',
         module_count: data.module_count?.toString() || '',
         featured: (data as any).featured || false,
+        upcoming: (data as any).upcoming || false,
         status: data.status || 'draft'
       });
       
@@ -1029,6 +1015,15 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: !!checked }))}
                 />
                 <Label htmlFor="featured">Featured Course</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="upcoming"
+                  checked={formData.upcoming}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, upcoming: !!checked }))}
+                />
+                <Label htmlFor="upcoming">Show in Upcoming Section</Label>
               </div>
             </div>
           </Card>

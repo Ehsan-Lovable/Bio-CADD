@@ -152,21 +152,35 @@ const FeaturedCourses = () => {
 
 const Upcoming = () => {
 	const [items, setItems] = useState<Array<any>>([]);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		(async () => {
-			const { data } = await supabase
-				.from('courses')
-				.select('id, title, slug, course_type, start_date, duration_text, poster_url')
-				.eq('status', 'published')
-				.eq('upcoming', true)
-				.order('start_date', { ascending: true })
-				.limit(8);
-			setItems(data || []);
+			try {
+				setLoading(true);
+				const { data, error } = await supabase
+					.from('courses')
+					.select('id, title, slug, course_type, start_date, duration_text, poster_url, upcoming')
+					.eq('status', 'published')
+					.eq('upcoming', true)
+					.order('start_date', { ascending: true })
+					.limit(8);
+				
+				if (error) {
+					console.error('Error fetching upcoming courses:', error);
+				}
+				console.log('Upcoming courses data:', data);
+				setItems(data || []);
+			} catch (err) {
+				console.error('Upcoming courses error:', err);
+			} finally {
+				setLoading(false);
+			}
 		})();
 	}, []);
 
-	if (!items.length) return null;
+	// Always show the section for now during development
+	// if (!items.length) return null;
 
 	return (
 		<section className="container mx-auto px-6 pt-6 md:pt-10">
@@ -183,38 +197,49 @@ const Upcoming = () => {
 				</Button>
 			</motion.div>
 
-			<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-				{items.map((course, i) => (
-					<motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.45 }} viewport={{ once: true }}>
-						<Card className="group relative overflow-hidden border-0 bg-gradient-to-b from-background/60 to-background/80 shadow-xl ring-1 ring-white/10">
-							<CardContent className="p-0">
-								<div className="relative aspect-[4/3] overflow-hidden">
-									<img src={course.poster_url || '/placeholder.svg'} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-									<div className="absolute left-3 top-3">
-										<Badge variant="secondary" className="backdrop-blur uppercase">
-											{course.course_type || 'LIVE'}
-										</Badge>
+			{loading ? (
+				<div className="text-center py-8">
+					<p className="text-muted-foreground">Loading upcoming courses...</p>
+				</div>
+			) : items.length === 0 ? (
+				<div className="text-center py-8">
+					<p className="text-muted-foreground">No upcoming courses available yet. Check back soon!</p>
+					<p className="text-sm text-muted-foreground mt-2">Admin can mark courses as "upcoming" in the admin panel.</p>
+				</div>
+			) : (
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+					{items.map((course, i) => (
+						<motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.45 }} viewport={{ once: true }}>
+							<Card className="group relative overflow-hidden border-0 bg-gradient-to-b from-background/60 to-background/80 shadow-xl ring-1 ring-white/10">
+								<CardContent className="p-0">
+									<div className="relative aspect-[4/3] overflow-hidden">
+										<img src={course.poster_url || '/placeholder.svg'} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+										<div className="absolute left-3 top-3">
+											<Badge variant="secondary" className="backdrop-blur uppercase">
+												{course.course_type || 'LIVE'}
+											</Badge>
+										</div>
 									</div>
-								</div>
-								<div className="space-y-3 p-4">
-									<h3 className="line-clamp-2 text-base font-semibold">{course.title}</h3>
-									<p className="text-sm text-muted-foreground">
-										{course.start_date ? new Date(course.start_date).toLocaleDateString() : course.duration_text || 'Starting soon'}
-									</p>
-									<div className="flex items-center justify-between">
-										<p className="text-xs text-muted-foreground">{course.duration_text}</p>
-										<Button asChild size="sm" className="group">
-											<Link to={`/courses/${course.slug}`}>
-												Explore <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-											</Link>
-										</Button>
+									<div className="space-y-3 p-4">
+										<h3 className="line-clamp-2 text-base font-semibold">{course.title}</h3>
+										<p className="text-sm text-muted-foreground">
+											{course.start_date ? new Date(course.start_date).toLocaleDateString() : course.duration_text || 'Starting soon'}
+										</p>
+										<div className="flex items-center justify-between">
+											<p className="text-xs text-muted-foreground">{course.duration_text}</p>
+											<Button asChild size="sm" className="group">
+												<Link to={`/courses/${course.slug}`}>
+													Explore <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+												</Link>
+											</Button>
+										</div>
 									</div>
-								</div>
-							</CardContent>
-						</Card>
-					</motion.div>
-				))}
-			</div>
+								</CardContent>
+							</Card>
+						</motion.div>
+					))}
+				</div>
+			)}
 		</section>
 	);
 };
@@ -329,7 +354,7 @@ function BookIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 const Homepage = () => {
-	return (
+  return (
 		<div className="min-h-screen bg-background">
 			<HomeHero />
 			<Upcoming />
@@ -337,8 +362,8 @@ const Homepage = () => {
 			<Testimonials />
 			<WhyUs />
 			<BigCTA />
-		</div>
-	);
+    </div>
+  );
 };
 
 export default Homepage;
