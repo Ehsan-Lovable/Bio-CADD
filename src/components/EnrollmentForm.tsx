@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { FileUpload } from '@/components/FileUpload';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { X, DollarSign } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 
 interface EnrollmentFormProps {
   courseId: string;
@@ -227,18 +227,13 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="border-b pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-xl font-bold text-primary">
-                Secure your seat
-              </DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Complete the form below to enroll in {course?.title}
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
+          <div>
+            <DialogTitle className="text-xl font-bold text-primary">
+              Secure your seat
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Complete the form below to enroll in {course?.title}
+            </p>
           </div>
         </DialogHeader>
 
