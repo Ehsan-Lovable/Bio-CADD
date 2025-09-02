@@ -93,12 +93,32 @@ function StatChip({ icon: Icon, label, value }: { icon: any; label: string; valu
 }
 
 const FeaturedCourses = () => {
-	const courses = [
-		{ id: 1, title: 'Genomics Masterclass', type: 'LIVE', batch: 'Batch 07 • Nov 2025', image: '/placeholder.svg', level: 'Intermediate' },
-		{ id: 2, title: 'Drug Discovery with CADD', type: 'RECORDED', batch: 'Self-paced • 18h', image: '/placeholder.svg', level: 'Advanced' },
-		{ id: 3, title: 'Proteomics with DIA/DDA', type: 'LIVE', batch: 'Batch 04 • Oct 2025', image: '/placeholder.svg', level: 'Advanced' },
-		{ id: 4, title: 'ML for Omics', type: 'RECORDED', batch: 'Self-paced • 22h', image: '/placeholder.svg', level: 'Intermediate' },
-	];
+	const [courses, setCourses] = useState<Array<any>>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		(async () => {
+			try {
+				setLoading(true);
+				const { data, error } = await supabase
+					.from('courses')
+					.select('id, title, slug, course_type, duration_text, poster_url, difficulty, featured, start_date')
+					.eq('status', 'published')
+					.order('featured', { ascending: false })
+					.order('created_at', { ascending: false })
+					.limit(8);
+				
+				if (error) {
+					console.error('Error fetching featured courses:', error);
+				}
+				setCourses(data || []);
+			} catch (err) {
+				console.error('Featured courses error:', err);
+			} finally {
+				setLoading(false);
+			}
+		})();
+	}, []);
 
 	return (
 		<section className="container mx-auto px-6 py-16 md:py-20">
@@ -115,42 +135,69 @@ const FeaturedCourses = () => {
 				</Button>
 			</motion.div>
 
-			<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-				{courses.map((course, i) => (
-					<motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08, duration: 0.5 }} viewport={{ once: true }}>
-						<Card className="group relative overflow-hidden border-0 bg-gradient-to-b from-background/60 to-background/80 shadow-xl ring-1 ring-white/10">
-							<div className="absolute inset-0 -z-10 bg-[radial-gradient(1200px_200px_at_0%_0%,rgba(124,58,237,0.08),transparent_70%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-							<CardContent className="p-0">
-								<div className="relative aspect-[4/3] overflow-hidden">
-									<img src={course.image} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-									<div className="absolute left-3 top-3">
-										<Badge variant="secondary" className="backdrop-blur">
-											{course.type}
-										</Badge>
-									</div>
-								</div>
-								<div className="space-y-3 p-4">
-									<h3 className="line-clamp-2 text-base font-semibold">{course.title}</h3>
-									<p className="text-sm text-muted-foreground">{course.batch}</p>
-									<div className="flex items-center justify-between">
-										<p className="text-xs text-muted-foreground">Level: {course.level}</p>
-										<Button asChild size="sm" className="group">
-											<Link to={`/courses`}>
-												Explore <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-											</Link>
-										</Button>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					</motion.div>
-				))}
-			</div>
+			{loading ? (
+				<div className="text-center py-8">
+					<p className="text-muted-foreground">Loading featured courses...</p>
+				</div>
+			) : courses.length === 0 ? (
+				<div className="text-center py-8">
+					<p className="text-muted-foreground">No courses available yet.</p>
+				</div>
+			) : (
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+					{courses.map((course, i) => {
+						const isUpcoming = course.start_date && new Date(course.start_date) > new Date();
+						return (
+							<motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08, duration: 0.5 }} viewport={{ once: true }}>
+								<Card className="group relative overflow-hidden border-0 bg-gradient-to-b from-background/60 to-background/80 shadow-xl ring-1 ring-white/10">
+									<div className="absolute inset-0 -z-10 bg-[radial-gradient(1200px_200px_at_0%_0%,rgba(124,58,237,0.08),transparent_70%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+									<CardContent className="p-0">
+										<div className="relative aspect-[4/3] overflow-hidden">
+											<img src={course.poster_url || '/placeholder.svg'} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+											<div className="absolute left-3 top-3 flex gap-2">
+												{course.featured && (
+													<Badge variant="default" className="backdrop-blur font-bold bg-yellow-500 hover:bg-yellow-600">
+														FEATURED
+													</Badge>
+												)}
+												{isUpcoming && (
+													<Badge variant="destructive" className="backdrop-blur font-bold bg-orange-500 hover:bg-orange-600">
+														UPCOMING
+													</Badge>
+												)}
+												<Badge variant="secondary" className="backdrop-blur uppercase">
+													{course.course_type || 'COURSE'}
+												</Badge>
+											</div>
+										</div>
+										<div className="space-y-3 p-4">
+											<h3 className="line-clamp-2 text-base font-semibold">{course.title}</h3>
+											<p className="text-sm text-muted-foreground">
+												{course.start_date ? new Date(course.start_date).toLocaleDateString() : course.duration_text || 'Available now'}
+											</p>
+											<div className="flex items-center justify-between">
+												<p className="text-xs text-muted-foreground">
+													{course.difficulty ? `Level: ${course.difficulty}` : course.duration_text}
+												</p>
+												<Button asChild size="sm" className="group">
+													<Link to={`/courses/${course.slug}`}>
+														Explore <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+													</Link>
+												</Button>
+											</div>
+										</div>
+									</CardContent>
+								</Card>
+							</motion.div>
+						);
+					})}
+				</div>
+			)}
 		</section>
 	);
 };
 
-const Upcoming = () => {
+const LatestCourses = () => {
 	const [items, setItems] = useState<Array<any>>([]);
 	const [loading, setLoading] = useState(true);
 
@@ -160,20 +207,19 @@ const Upcoming = () => {
 				setLoading(true);
 				const { data, error } = await supabase
 					.from('courses')
-					.select('id, title, slug, course_type, start_date, duration_text, poster_url')
+					.select('id, title, slug, course_type, start_date, duration_text, poster_url, created_at')
 					.eq('status', 'published')
-					.not('start_date', 'is', null)
-					.gte('start_date', new Date().toISOString())
-					.order('start_date', { ascending: true })
+					.order('start_date', { ascending: true, nullsFirst: false })
+					.order('created_at', { ascending: false })
 					.limit(8);
 				
 				if (error) {
-					console.error('Error fetching upcoming courses:', error);
+					console.error('Error fetching latest courses:', error);
 				}
-				console.log('Upcoming courses data:', data);
+				console.log('Latest courses data:', data);
 				setItems(data || []);
 			} catch (err) {
-				console.error('Upcoming courses error:', err);
+				console.error('Latest courses error:', err);
 			} finally {
 				setLoading(false);
 			}
@@ -187,8 +233,8 @@ const Upcoming = () => {
 		<section className="container mx-auto px-6 pt-6 md:pt-10">
 			<motion.div {...sectionFade} className="mb-6 flex items-end justify-between">
 				<div>
-					<h2 className="text-2xl font-bold sm:text-3xl">Upcoming</h2>
-					<p className="mt-2 text-muted-foreground">Hand-picked courses starting soon</p>
+					<h2 className="text-2xl font-bold sm:text-3xl">Latest Courses</h2>
+					<p className="mt-2 text-muted-foreground">Newest and upcoming courses from our catalog</p>
 				</div>
 				<Button asChild variant="ghost" className="group">
 					<Link to="/courses">
@@ -200,11 +246,11 @@ const Upcoming = () => {
 
 			{loading ? (
 				<div className="text-center py-8">
-					<p className="text-muted-foreground">Loading upcoming courses...</p>
+					<p className="text-muted-foreground">Loading latest courses...</p>
 				</div>
 			) : items.length === 0 ? (
 				<div className="text-center py-8">
-					<p className="text-muted-foreground">No upcoming courses available yet. Check back soon!</p>
+					<p className="text-muted-foreground">No courses available yet. Check back soon!</p>
 				</div>
 			) : (
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -363,7 +409,7 @@ const Homepage = () => {
   return (
 		<div className="min-h-screen bg-background">
 			<HomeHero />
-			<Upcoming />
+			<LatestCourses />
 			<FeaturedCourses />
 			<Testimonials />
 			<WhyUs />
