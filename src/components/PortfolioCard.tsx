@@ -138,16 +138,7 @@ export function PortfolioCard({ project, className }: PortfolioCardProps) {
             </p>
           )}
 
-          {/* CTA */}
-          <Button
-            asChild
-            className="w-full group/btn bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-          >
-            <Link to={`/portfolio/${project.slug}`}>
-              <span>View Case Study</span>
-              <ArrowRight className="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform duration-200" />
-            </Link>
-          </Button>
+
         </CardContent>
       </Card>
     </motion.div>
