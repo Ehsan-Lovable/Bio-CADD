@@ -78,8 +78,62 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
   const { session } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Default form fields if none are configured
+  const defaultFormFields: FormField[] = [
+    {
+      id: 'default-1',
+      field_name: 'full_name',
+      field_type: 'text',
+      field_label: 'Full Name',
+      field_options: [],
+      is_required: true,
+      field_order: 1,
+      is_active: true
+    },
+    {
+      id: 'default-2',
+      field_name: 'email',
+      field_type: 'email',
+      field_label: 'Email Address',
+      field_options: [],
+      is_required: true,
+      field_order: 2,
+      is_active: true
+    },
+    {
+      id: 'default-3',
+      field_name: 'phone',
+      field_type: 'tel',
+      field_label: 'Phone Number',
+      field_options: [],
+      is_required: true,
+      field_order: 3,
+      is_active: true
+    },
+    {
+      id: 'default-4',
+      field_name: 'institution',
+      field_type: 'text',
+      field_label: 'Institution/Organization',
+      field_options: [],
+      is_required: false,
+      field_order: 4,
+      is_active: true
+    },
+    {
+      id: 'default-5',
+      field_name: 'payment_screenshot',
+      field_type: 'file',
+      field_label: 'Payment Screenshot',
+      field_options: [],
+      is_required: true,
+      field_order: 5,
+      is_active: true
+    }
+  ];
+
   // Fetch form fields for this course
-  const { data: formFields, isLoading } = useQuery({
+  const { data: customFormFields, isLoading } = useQuery({
     queryKey: ['enrollment-form-fields', courseId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -94,6 +148,9 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
     },
     enabled: isOpen && !!courseId
   });
+
+  // Use custom fields if available, otherwise use default fields
+  const formFields = customFormFields && customFormFields.length > 0 ? customFormFields : defaultFormFields;
 
   // Create dynamic form schema based on fields
   const formSchema = formFields ? createFormSchema(formFields) : z.object({});
@@ -273,6 +330,15 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Show info if using default fields */}
+              {(!customFormFields || customFormFields.length === 0) && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Using standard registration form.</strong> Complete the fields below to enroll in this course.
+                  </p>
+                </div>
+              )}
 
               {/* Dynamic Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

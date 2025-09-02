@@ -226,21 +226,25 @@ export default function AdminSubmissions() {
     const csvHeaders = [
       'ID',
       'Student Name',
+      'Email',
       'Phone',
+      'Institution',
       'Course',
       'Status',
-      'Submission Link',
+      'Payment Screenshot',
       'Created At'
     ];
 
     const csvData = submissions.map(submission => [
       submission.id,
       (submission.form_data as any)?.full_name || 'N/A',
+      (submission.form_data as any)?.email || 'N/A',
       (submission.form_data as any)?.phone || 'N/A',
+      (submission.form_data as any)?.institution || 'Not provided',
       submission.courses?.title || 'N/A',
       submission.status,
       submission.payment_screenshot_url || 'N/A',
-      new Date(submission.submitted_at).toLocaleDateString()
+      new Date(submission.submitted_at || submission.created_at).toLocaleDateString()
     ]);
 
     const csvContent = [csvHeaders, ...csvData]
@@ -378,11 +382,20 @@ export default function AdminSubmissions() {
         <div>
           <h1 className="text-3xl font-bold">Submissions</h1>
           <p className="text-muted-foreground">Manage course submissions and participant information</p>
-          <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Course-Based Submission System:</strong> Submissions are now organized by course type. 
-              Live courses support batch-based enrollment with limited seats, while recorded courses offer unlimited access.
-            </p>
+          <div className="mt-2 space-y-2">
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Course-Based Submission System:</strong> Submissions are now organized by course type. 
+                Live courses support batch-based enrollment with limited seats, while recorded courses offer unlimited access.
+              </p>
+            </div>
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-800">
+                <strong>Auto-Generated Forms:</strong> If a course doesn't have custom enrollment form fields configured, 
+                the system automatically uses standard fields (name, email, phone, institution, payment screenshot). 
+                Configure custom fields in <strong>Admin → Enrollment Forms</strong> for specialized requirements.
+              </p>
+            </div>
           </div>
         </div>
         <Button onClick={exportToCSV} disabled={!submissions || submissions.length === 0}>
@@ -601,9 +614,23 @@ export default function AdminSubmissions() {
                 </div>
 
                 <div>
+                  <label className="text-sm font-medium text-gray-700">Email</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {(selectedSubmission.form_data as any)?.email || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
                   <label className="text-sm font-medium text-gray-700">Phone</label>
                   <div className="mt-1 text-sm text-gray-900">
                     {(selectedSubmission.form_data as any)?.phone || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Institution/Organization</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {(selectedSubmission.form_data as any)?.institution || 'Not provided'}
                   </div>
                 </div>
 
