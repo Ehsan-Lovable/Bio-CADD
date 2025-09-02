@@ -70,8 +70,14 @@ export default function PortfolioDetail() {
           .eq('status', 'published')
           .single();
 
-        if (projectError) throw projectError;
-        if (!projectData) throw new Error('Project not found');
+        if (projectError) {
+          console.error('Project fetch error:', projectError);
+          throw new Error(`Project not found: ${projectError.message}`);
+        }
+        if (!projectData) {
+          console.error('No project data found for slug:', slug);
+          throw new Error('Project not found or not published');
+        }
 
         setProject(projectData);
 
@@ -155,7 +161,27 @@ export default function PortfolioDetail() {
   if (loading) return <LoadingState />;
   
   if (error || !project) {
-    return <Navigate to="/portfolio" replace />;
+    return (
+      <div className="min-h-screen bg-background">
+        <SEOHead 
+          title="Portfolio Project Not Found"
+          description="The requested portfolio project could not be found"
+        />
+        <Header />
+        <div className="max-w-4xl mx-auto px-6 py-20 text-center">
+          <h1 className="text-3xl font-bold mb-4">Portfolio Project Not Found</h1>
+          <p className="text-muted-foreground mb-8">
+            {error || 'The portfolio project you are looking for could not be found or is not published yet.'}
+          </p>
+          <Button asChild>
+            <Link to="/portfolio">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Portfolio
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -554,11 +554,24 @@ export default function AdminPortfolioForm() {
               {saving ? 'Saving...' : 'Save'}
             </Button>
 
-            {isEdit && form.getValues('status') === 'published' && (
+            {isEdit && (
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => window.open(`/portfolio/${form.getValues('slug')}`, '_blank')}
+                onClick={() => {
+                  const status = form.getValues('status');
+                  const slug = form.getValues('slug');
+                  
+                  if (status === 'published') {
+                    window.open(`/portfolio/${slug}`, '_blank');
+                  } else {
+                    toast({
+                      title: 'Cannot view public page',
+                      description: 'Portfolio must be published to view public page. Change status to "Published" and save first.',
+                      variant: 'destructive',
+                    });
+                  }
+                }}
               >
                 <Eye className="h-4 w-4 mr-2" />
                 View Public

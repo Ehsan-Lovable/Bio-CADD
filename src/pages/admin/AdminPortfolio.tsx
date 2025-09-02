@@ -151,7 +151,17 @@ function AdminPortfolioList() {
     },
     {
       label: 'View Public',
-      onClick: (row: PortfolioProject) => window.open(`/portfolio/${row.slug}`, '_blank'),
+      onClick: (row: PortfolioProject) => {
+        if (row.status === 'published') {
+          window.open(`/portfolio/${row.slug}`, '_blank');
+        } else {
+          toast({
+            title: 'Cannot view public page',
+            description: `Portfolio status is "${row.status}". Change status to "Published" and save to view public page.`,
+            variant: 'destructive',
+          });
+        }
+      },
     },
     {
       label: 'Delete',
