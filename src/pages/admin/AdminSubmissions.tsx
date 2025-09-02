@@ -34,7 +34,9 @@ export default function AdminSubmissions() {
       const documentsBucket = buckets?.find(bucket => bucket.name === 'documents');
       if (!documentsBucket) {
         console.error('Documents bucket not found');
-        toast.error('Storage bucket not found. Please run the database migration to fix this issue.');
+        toast.error('Storage bucket "documents" not found. Please apply the storage migration first.');
+        // Try to open the URL directly as fallback
+        window.open(url, '_blank');
         return;
       }
       
