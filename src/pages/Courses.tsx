@@ -61,7 +61,7 @@ const Courses = () => {
     queryFn: async () => {
       let query = supabase
         .from('courses')
-        .select('*', { count: 'exact' })
+        .select('*, start_date', { count: 'exact' })
         .eq('status', 'published');
 
       // Apply filters

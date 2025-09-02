@@ -160,9 +160,10 @@ const Upcoming = () => {
 				setLoading(true);
 				const { data, error } = await supabase
 					.from('courses')
-					.select('id, title, slug, course_type, start_date, duration_text, poster_url, upcoming')
+					.select('id, title, slug, course_type, start_date, duration_text, poster_url')
 					.eq('status', 'published')
-					.eq('upcoming', true)
+					.not('start_date', 'is', null)
+					.gte('start_date', new Date().toISOString())
 					.order('start_date', { ascending: true })
 					.limit(8);
 				
@@ -213,7 +214,10 @@ const Upcoming = () => {
 								<CardContent className="p-0">
 									<div className="relative aspect-[4/3] overflow-hidden">
 										<img src={course.poster_url || '/placeholder.svg'} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-										<div className="absolute left-3 top-3">
+										<div className="absolute left-3 top-3 flex gap-2">
+											<Badge variant="destructive" className="backdrop-blur uppercase font-bold bg-orange-500 hover:bg-orange-600 text-white">
+												UPCOMING
+											</Badge>
 											<Badge variant="secondary" className="backdrop-blur uppercase">
 												{course.course_type || 'LIVE'}
 											</Badge>

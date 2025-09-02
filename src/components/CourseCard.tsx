@@ -21,6 +21,7 @@ interface CourseCardProps {
     duration_text?: string;
     certificate?: boolean;
     difficulty?: string;
+    start_date?: string;
   };
   className?: string;
 }
@@ -30,6 +31,9 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
   const { isEnrolled, canViewContent } = useGatedContent(course.id);
   const navigate = useNavigate();
 
+  // Check if course is upcoming (has a start_date in the future)
+  const isUpcoming = course.start_date && new Date(course.start_date) > new Date();
+
   const handleEnrollClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -38,7 +42,7 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
   };
 
   return (
-    <Card className={`group overflow-hidden hover:shadow-mustard transition-all duration-300 ${className || ''}`}>
+    <Card className={`group overflow-hidden hover:shadow-mustard transition-all duration-300 ${isUpcoming ? 'ring-2 ring-orange-500/50 shadow-lg shadow-orange-500/20' : ''} ${className || ''}`}>
       <Link to={`/courses/${course.slug}`}>
         <div className="aspect-video bg-muted relative overflow-hidden">
           {course.poster_url ? (
@@ -52,7 +56,12 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
               <BookOpen className="h-16 w-16 text-primary/40" />
             </div>
           )}
-          <div className="absolute top-4 left-4">
+          <div className="absolute top-4 left-4 flex gap-2">
+            {isUpcoming && (
+              <Badge variant="destructive" className="bg-orange-500 hover:bg-orange-600 text-white font-bold">
+                UPCOMING
+              </Badge>
+            )}
             <Badge variant={course.course_type === 'live' ? 'destructive' : 'secondary'}>
               {course.course_type?.charAt(0).toUpperCase() + course.course_type?.slice(1) || 'Course'}
             </Badge>
