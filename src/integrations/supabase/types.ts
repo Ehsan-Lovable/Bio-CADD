@@ -91,7 +91,6 @@ export type Database = {
           id: string
           language: string | null
           module_count: number | null
-          upcoming: boolean | null
           poster_url: string | null
           price_offer: number | null
           price_regular: number | null
@@ -103,6 +102,7 @@ export type Database = {
           time_24h: string | null
           title: string
           topics: string[] | null
+          upcoming: boolean | null
           updated_at: string | null
           whats_included: string[] | null
           why_join: Json | null
@@ -120,7 +120,6 @@ export type Database = {
           id?: string
           language?: string | null
           module_count?: number | null
-          upcoming?: boolean | null
           poster_url?: string | null
           price_offer?: number | null
           price_regular?: number | null
@@ -132,6 +131,7 @@ export type Database = {
           time_24h?: string | null
           title: string
           topics?: string[] | null
+          upcoming?: boolean | null
           updated_at?: string | null
           whats_included?: string[] | null
           why_join?: Json | null
@@ -149,7 +149,6 @@ export type Database = {
           id?: string
           language?: string | null
           module_count?: number | null
-          upcoming?: boolean | null
           poster_url?: string | null
           price_offer?: number | null
           price_regular?: number | null
@@ -161,6 +160,7 @@ export type Database = {
           time_24h?: string | null
           title?: string
           topics?: string[] | null
+          upcoming?: boolean | null
           updated_at?: string | null
           whats_included?: string[] | null
           why_join?: Json | null

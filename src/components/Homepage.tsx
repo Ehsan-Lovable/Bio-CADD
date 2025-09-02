@@ -248,6 +248,9 @@ const Testimonials = () => {
 		{ id: 1, name: 'Ayesha Khan', role: 'MSc Bioinformatics', avatar: '/placeholder.svg', rating: 5, text: 'The courses are incredibly well-structured and practical. I got my first research internship after completing the Genomics track.' },
 		{ id: 2, name: 'Rahul Mehta', role: 'PhD Candidate', avatar: '/placeholder.svg', rating: 5, text: 'Expert mentors and hands-on projects. The CADD course was a game-changer for my thesis.' },
 		{ id: 3, name: 'Sara Lee', role: 'Data Scientist', avatar: '/placeholder.svg', rating: 4, text: 'Loved the ML for Omics course. Real datasets and guided notebooks helped me transition roles.' },
+		{ id: 4, name: 'David Chen', role: 'Biotech Researcher', avatar: '/placeholder.svg', rating: 5, text: 'The protein structure analysis course opened new research directions for my work. Excellent hands-on tutorials.' },
+		{ id: 5, name: 'Maria Rodriguez', role: 'Computational Biologist', avatar: '/placeholder.svg', rating: 5, text: 'Outstanding curriculum design. The RNA-seq analysis module helped me publish my first paper as lead author.' },
+		{ id: 6, name: 'Ahmed Hassan', role: 'Bioinformatics Analyst', avatar: '/placeholder.svg', rating: 4, text: 'Great practical approach to learning. The pathway analysis course directly applies to my daily work at the hospital.' },
 	];
 	return (
 		<section className="bg-gradient-to-b from-background to-background/50">

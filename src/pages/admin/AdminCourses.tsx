@@ -622,6 +622,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
         price_regular: formData.price_regular ? parseFloat(formData.price_regular) : null,
         price_offer: formData.price_offer ? parseFloat(formData.price_offer) : null,
         module_count: formData.module_count ? parseInt(formData.module_count) : null,
+        start_date: formData.start_date || null,
         status: publishAfterSave ? ('published' as const) : formData.status,
         course_type: formData.course_type || null
       };
