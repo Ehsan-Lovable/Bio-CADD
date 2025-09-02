@@ -565,7 +565,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
     difficulty: '',
     module_count: '',
     featured: false,
-
+    upcoming: false,
     status: 'draft' as 'draft' | 'published' | 'archived'
   });
 
@@ -606,7 +606,7 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
         difficulty: data.difficulty || '',
         module_count: data.module_count?.toString() || '',
         featured: (data as any).featured || false,
-
+        upcoming: (data as any).upcoming || false,
         status: data.status || 'draft'
       });
       
@@ -1018,6 +1018,14 @@ const AdminCourseForm = ({ courseId }: { courseId?: string }) => {
                 <Label htmlFor="featured">Featured Course</Label>
               </div>
               
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="upcoming"
+                  checked={formData.upcoming}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, upcoming: !!checked }))}
+                />
+                <Label htmlFor="upcoming">Upcoming Course</Label>
+              </div>
 
             </div>
           </Card>
