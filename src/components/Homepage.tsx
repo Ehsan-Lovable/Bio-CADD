@@ -254,21 +254,25 @@ const LatestCourses = () => {
 				</div>
 			) : (
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-					{items.map((course, i) => (
-						<motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.45 }} viewport={{ once: true }}>
-							<Card className="group relative overflow-hidden border-0 bg-gradient-to-b from-background/60 to-background/80 shadow-xl ring-1 ring-white/10">
-								<CardContent className="p-0">
-									<div className="relative aspect-[4/3] overflow-hidden">
-										<img src={course.poster_url || '/placeholder.svg'} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-										<div className="absolute left-3 top-3 flex gap-2">
-											<Badge variant="destructive" className="backdrop-blur uppercase font-bold bg-orange-500 hover:bg-orange-600 text-white">
-												UPCOMING
-											</Badge>
-											<Badge variant="secondary" className="backdrop-blur uppercase">
-												{course.course_type || 'LIVE'}
-											</Badge>
+					{items.map((course, i) => {
+						const isUpcoming = course.start_date && new Date(course.start_date) > new Date();
+						return (
+							<motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.45 }} viewport={{ once: true }}>
+								<Card className="group relative overflow-hidden border-0 bg-gradient-to-b from-background/60 to-background/80 shadow-xl ring-1 ring-white/10">
+									<CardContent className="p-0">
+										<div className="relative aspect-[4/3] overflow-hidden">
+											<img src={course.poster_url || '/placeholder.svg'} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+											<div className="absolute left-3 top-3 flex gap-2">
+												{isUpcoming && (
+													<Badge variant="destructive" className="backdrop-blur uppercase font-bold bg-orange-500 hover:bg-orange-600 text-white">
+														UPCOMING
+													</Badge>
+												)}
+												<Badge variant="secondary" className="backdrop-blur uppercase">
+													{course.course_type || 'LIVE'}
+												</Badge>
+											</div>
 										</div>
-									</div>
 									<div className="space-y-3 p-4">
 										<h3 className="line-clamp-2 text-base font-semibold">{course.title}</h3>
 										<p className="text-sm text-muted-foreground">
@@ -286,7 +290,8 @@ const LatestCourses = () => {
 								</CardContent>
 							</Card>
 						</motion.div>
-					))}
+						);
+					})}
 				</div>
 			)}
 		</section>
