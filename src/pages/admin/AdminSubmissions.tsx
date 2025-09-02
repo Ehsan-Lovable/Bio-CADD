@@ -231,6 +231,8 @@ export default function AdminSubmissions() {
       'Discipline',
       'University',
       'Country',
+      'Current State',
+      'Current City',
       'Academic Status',
       'Experience',
       'Payment Method',
@@ -248,6 +250,8 @@ export default function AdminSubmissions() {
       (submission.form_data as any)?.discipline || 'N/A',
       (submission.form_data as any)?.university || 'N/A',
       (submission.form_data as any)?.country || 'N/A',
+      (submission.form_data as any)?.state || 'N/A',
+      (submission.form_data as any)?.city || 'N/A',
       (submission.form_data as any)?.academic_status || 'N/A',
       (submission.form_data as any)?.experience || 'N/A',
       (submission.form_data as any)?.payment_method || 'N/A',
@@ -655,6 +659,20 @@ export default function AdminSubmissions() {
                   <label className="text-sm font-medium text-gray-700">Country</label>
                   <div className="mt-1 text-sm text-gray-900">
                     {(selectedSubmission.form_data as any)?.country || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Current State</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {(selectedSubmission.form_data as any)?.state || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Current City</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {(selectedSubmission.form_data as any)?.city || 'N/A'}
                   </div>
                 </div>
 
