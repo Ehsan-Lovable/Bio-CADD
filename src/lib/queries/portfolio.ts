@@ -16,7 +16,7 @@ export const getPublishedProjects = async (filters: PortfolioFilters = {}) => {
       .from('portfolio_projects')
       .select(`
         *,
-        portfolio_images!inner(url, alt, is_cover, "order")
+        portfolio_images(url, alt, is_cover, "order")
       `)
       .eq('status', 'published')
       .order('updated_at', { ascending: false });
@@ -90,7 +90,7 @@ export const getRelatedProjects = async (currentProjectId: string, services: str
       .from('portfolio_projects')
       .select(`
         *,
-        portfolio_images!inner(url, alt, is_cover)
+        portfolio_images(url, alt, is_cover)
       `)
       .eq('status', 'published')
       .neq('id', currentProjectId)
