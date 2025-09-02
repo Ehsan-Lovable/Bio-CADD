@@ -161,7 +161,7 @@ const Testimonials = () => {
 					<h2 className="text-2xl font-bold sm:text-3xl">What Learners Say</h2>
 					<p className="mt-2 text-muted-foreground">Stories from our global community</p>
 				</motion.div>
-				<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+				<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
 					{items.map((t, i) => (
 						<motion.div key={t.id} initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.45 }} viewport={{ once: true }}>
 							<Card className="bg-card/60 backdrop-blur">
