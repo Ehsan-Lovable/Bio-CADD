@@ -228,7 +228,12 @@ export default function AdminSubmissions() {
       'Student Name',
       'Email',
       'Phone',
-      'Institution',
+      'Discipline',
+      'University',
+      'Country',
+      'Academic Status',
+      'Experience',
+      'Payment Method',
       'Course',
       'Status',
       'Payment Screenshot',
@@ -240,7 +245,12 @@ export default function AdminSubmissions() {
       (submission.form_data as any)?.full_name || 'N/A',
       (submission.form_data as any)?.email || 'N/A',
       (submission.form_data as any)?.phone || 'N/A',
-      (submission.form_data as any)?.institution || 'Not provided',
+      (submission.form_data as any)?.discipline || 'N/A',
+      (submission.form_data as any)?.university || 'N/A',
+      (submission.form_data as any)?.country || 'N/A',
+      (submission.form_data as any)?.academic_status || 'N/A',
+      (submission.form_data as any)?.experience || 'N/A',
+      (submission.form_data as any)?.payment_method || 'N/A',
       submission.courses?.title || 'N/A',
       submission.status,
       submission.payment_screenshot_url || 'N/A',
@@ -628,11 +638,55 @@ export default function AdminSubmissions() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Institution/Organization</label>
+                  <label className="text-sm font-medium text-gray-700">Discipline</label>
                   <div className="mt-1 text-sm text-gray-900">
-                    {(selectedSubmission.form_data as any)?.institution || 'Not provided'}
+                    {(selectedSubmission.form_data as any)?.discipline || 'N/A'}
                   </div>
                 </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">University</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {(selectedSubmission.form_data as any)?.university || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Country</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {(selectedSubmission.form_data as any)?.country || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Academic/Professional Status</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {(selectedSubmission.form_data as any)?.academic_status || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Experience Level</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {(selectedSubmission.form_data as any)?.experience || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Payment Method</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {(selectedSubmission.form_data as any)?.payment_method || 'N/A'}
+                  </div>
+                </div>
+
+                {(selectedSubmission.form_data as any)?.comments && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Comments</label>
+                    <div className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {(selectedSubmission.form_data as any)?.comments}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="text-sm font-medium text-gray-700">Course</label>

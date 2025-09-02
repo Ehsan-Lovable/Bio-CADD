@@ -94,7 +94,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       id: 'default-2',
       field_name: 'email',
       field_type: 'email',
-      field_label: 'Email Address',
+      field_label: 'Email',
       field_options: [],
       is_required: true,
       field_order: 2,
@@ -102,9 +102,9 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
     },
     {
       id: 'default-3',
-      field_name: 'phone',
-      field_type: 'tel',
-      field_label: 'Phone Number',
+      field_name: 'discipline',
+      field_type: 'text',
+      field_label: 'Discipline',
       field_options: [],
       is_required: true,
       field_order: 3,
@@ -112,22 +112,122 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
     },
     {
       id: 'default-4',
-      field_name: 'institution',
+      field_name: 'university',
       field_type: 'text',
-      field_label: 'Institution/Organization',
+      field_label: 'University',
       field_options: [],
-      is_required: false,
+      is_required: true,
       field_order: 4,
       is_active: true
     },
     {
       id: 'default-5',
+      field_name: 'phone',
+      field_type: 'tel',
+      field_label: 'Phone',
+      field_options: [],
+      is_required: true,
+      field_order: 5,
+      is_active: true
+    },
+    {
+      id: 'default-6',
+      field_name: 'messenger_whatsapp',
+      field_type: 'text',
+      field_label: 'Messenger/WhatsApp',
+      field_options: [],
+      is_required: true,
+      field_order: 6,
+      is_active: true
+    },
+    {
+      id: 'default-7',
+      field_name: 'telegram',
+      field_type: 'text',
+      field_label: 'Telegram',
+      field_options: [],
+      is_required: false,
+      field_order: 7,
+      is_active: true
+    },
+    {
+      id: 'default-8',
+      field_name: 'country',
+      field_type: 'select',
+      field_label: 'Country',
+      field_options: ['Bangladesh', 'India', 'Pakistan', 'Nepal', 'Sri Lanka', 'USA', 'UK', 'Canada', 'Australia', 'Other'],
+      is_required: true,
+      field_order: 8,
+      is_active: true
+    },
+    {
+      id: 'default-9',
+      field_name: 'state',
+      field_type: 'text',
+      field_label: 'State',
+      field_options: [],
+      is_required: false,
+      field_order: 9,
+      is_active: true
+    },
+    {
+      id: 'default-10',
+      field_name: 'city',
+      field_type: 'text',
+      field_label: 'City',
+      field_options: [],
+      is_required: false,
+      field_order: 10,
+      is_active: true
+    },
+    {
+      id: 'default-11',
+      field_name: 'academic_status',
+      field_type: 'select',
+      field_label: 'Academic/Professional Status',
+      field_options: ['Undergraduate Student', 'Graduate Student', 'PhD Student', 'Postdoc', 'Faculty/Professor', 'Industry Professional', 'Research Scientist', 'Other'],
+      is_required: true,
+      field_order: 11,
+      is_active: true
+    },
+    {
+      id: 'default-12',
+      field_name: 'experience',
+      field_type: 'select',
+      field_label: 'Experience',
+      field_options: ['Beginner (0-1 years)', 'Intermediate (1-3 years)', 'Advanced (3-5 years)', 'Expert (5+ years)'],
+      is_required: true,
+      field_order: 12,
+      is_active: true
+    },
+    {
+      id: 'default-13',
+      field_name: 'comments',
+      field_type: 'textarea',
+      field_label: 'Comments',
+      field_options: [],
+      is_required: false,
+      field_order: 13,
+      is_active: true
+    },
+    {
+      id: 'default-14',
+      field_name: 'payment_method',
+      field_type: 'select',
+      field_label: 'Preferred Payment Method',
+      field_options: ['UPI', 'PayPal', 'Bkash'],
+      is_required: true,
+      field_order: 14,
+      is_active: true
+    },
+    {
+      id: 'default-15',
       field_name: 'payment_screenshot',
       field_type: 'file',
       field_label: 'Payment Screenshot',
       field_options: [],
       is_required: true,
-      field_order: 5,
+      field_order: 15,
       is_active: true
     }
   ];
@@ -306,25 +406,33 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-6">
               {/* Course Fee Display */}
-              <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-                <CardContent className="p-4">
+              <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <CardContent className="p-6">
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
-                      <DollarSign className="h-5 w-5" />
+                    <h3 className="text-2xl font-bold text-purple-600 mb-4">
                       Course Fee - ${course?.price_offer || course?.price_regular || 50}
                     </h3>
-                    <div className="flex justify-center gap-4 mt-3 text-sm">
-                      <div className="text-center">
-                        <Badge variant="outline" className="text-xs">UPI</Badge>
-                        <p className="font-mono text-xs mt-1">9123999858@xiiB</p>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                        <div className="w-12 h-12 mx-auto mb-2 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <span className="text-blue-600 font-bold text-sm">UPI</span>
+                        </div>
+                        <p className="text-xs text-gray-600">UPI</p>
+                        <p className="font-mono text-xs font-medium mt-1">9123999858@xiiB</p>
                       </div>
-                      <div className="text-center">
-                        <Badge variant="outline" className="text-xs">PayPal</Badge>
-                        <p className="font-mono text-xs mt-1">haifa114@gmail.com</p>
+                      <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                        <div className="w-12 h-12 mx-auto mb-2 bg-blue-500 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-xs">PP</span>
+                        </div>
+                        <p className="text-xs text-gray-600">PayPal (int.)</p>
+                        <p className="font-mono text-xs font-medium mt-1">haifa114@gmail.com</p>
                       </div>
-                      <div className="text-center">
-                        <Badge variant="outline" className="text-xs">Bkash</Badge>
-                        <p className="font-mono text-xs mt-1">+8801994256422</p>
+                      <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                        <div className="w-12 h-12 mx-auto mb-2 bg-pink-500 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-xs">bK</span>
+                        </div>
+                        <p className="text-xs text-gray-600">Bkash</p>
+                        <p className="font-mono text-xs font-medium mt-1">+8801994256422</p>
                       </div>
                     </div>
                   </div>
@@ -342,12 +450,28 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
 
               {/* Dynamic Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {formFields?.map((field) => (
-                  <div key={field.id} className={field.field_type === 'textarea' || field.field_type === 'file' ? 'md:col-span-2' : ''}>
+                {formFields?.filter(field => field.field_name !== 'payment_method' && field.field_name !== 'payment_screenshot').map((field) => (
+                  <div key={field.id} className={field.field_type === 'textarea' || field.field_type === 'comments' ? 'md:col-span-2' : ''}>
                     {renderFormField(field)}
                   </div>
                 ))}
               </div>
+
+              {/* Payment Method Section */}
+              {formFields?.find(field => field.field_name === 'payment_method') && (
+                <div className="space-y-4">
+                  <div className="border-t pt-4">
+                    {renderFormField(formFields.find(field => field.field_name === 'payment_method')!)}
+                  </div>
+                </div>
+              )}
+
+              {/* Payment Screenshot Section */}
+              {formFields?.find(field => field.field_name === 'payment_screenshot') && (
+                <div className="space-y-4">
+                  {renderFormField(formFields.find(field => field.field_name === 'payment_screenshot')!)}
+                </div>
+              )}
 
               <Button
                 type="submit"
