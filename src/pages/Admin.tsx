@@ -30,7 +30,6 @@ import AdminSubmissions from './admin/AdminSubmissions';
 import AdminEnrollmentForms from './admin/AdminEnrollmentForms';
 import AdminUsers from './admin/AdminUsers';
 import AdminSiteSettings from './admin/AdminSiteSettings';
-import AdminUpcomingSessions from './admin/AdminUpcomingSessions';
 import AdminBlog from './admin/AdminBlog';
 
 
@@ -81,11 +80,7 @@ const sidebarItems = [
     path: '/admin/settings', 
     icon: Settings 
   },
-  { 
-    name: 'Upcoming Sessions', 
-    path: '/admin/upcoming-sessions', 
-    icon: Calendar 
-  },
+  // Removed Upcoming Sessions (replaced by toggle from Courses)
   { 
     name: 'Blog Management', 
     path: '/admin/blog', 
@@ -217,7 +212,7 @@ export default function Admin() {
             <Route path="enrollment-forms" element={<AdminEnrollmentForms />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="settings" element={<AdminSiteSettings />} />
-            <Route path="upcoming-sessions" element={<AdminUpcomingSessions />} />
+            {/* Upcoming sessions removed */}
             <Route path="blog/*" element={<AdminBlog />} />
 
           </Routes>

@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowRight, Star, Sparkles, Play, Calendar, Users } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useState } from 'react';
 
 const gradientText = 'bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent';
 
@@ -148,6 +150,75 @@ const FeaturedCourses = () => {
 	);
 };
 
+const Upcoming = () => {
+	const [items, setItems] = useState<Array<any>>([]);
+
+	useEffect(() => {
+		(async () => {
+			const { data } = await supabase
+				.from('courses')
+				.select('id, title, slug, course_type, start_date, duration_text, poster_url')
+				.eq('status', 'published')
+				.eq('upcoming', true)
+				.order('start_date', { ascending: true })
+				.limit(8);
+			setItems(data || []);
+		})();
+	}, []);
+
+	if (!items.length) return null;
+
+	return (
+		<section className="container mx-auto px-6 pt-6 md:pt-10">
+			<motion.div {...sectionFade} className="mb-6 flex items-end justify-between">
+				<div>
+					<h2 className="text-2xl font-bold sm:text-3xl">Upcoming</h2>
+					<p className="mt-2 text-muted-foreground">Hand-picked courses starting soon</p>
+				</div>
+				<Button asChild variant="ghost" className="group">
+					<Link to="/courses">
+						Browse all
+						<ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+					</Link>
+				</Button>
+			</motion.div>
+
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+				{items.map((course, i) => (
+					<motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.45 }} viewport={{ once: true }}>
+						<Card className="group relative overflow-hidden border-0 bg-gradient-to-b from-background/60 to-background/80 shadow-xl ring-1 ring-white/10">
+							<CardContent className="p-0">
+								<div className="relative aspect-[4/3] overflow-hidden">
+									<img src={course.poster_url || '/placeholder.svg'} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+									<div className="absolute left-3 top-3">
+										<Badge variant="secondary" className="backdrop-blur uppercase">
+											{course.course_type || 'LIVE'}
+										</Badge>
+									</div>
+								</div>
+								<div className="space-y-3 p-4">
+									<h3 className="line-clamp-2 text-base font-semibold">{course.title}</h3>
+									<p className="text-sm text-muted-foreground">
+										{course.start_date ? new Date(course.start_date).toLocaleDateString() : course.duration_text || 'Starting soon'}
+									</p>
+									<div className="flex items-center justify-between">
+										<p className="text-xs text-muted-foreground">{course.duration_text}</p>
+										<Button asChild size="sm" className="group">
+											<Link to={`/courses/${course.slug}`}>
+												Explore <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+											</Link>
+										</Button>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					</motion.div>
+				))}
+			</div>
+		</section>
+	);
+};
+
 const Testimonials = () => {
 	const items = [
 		{ id: 1, name: 'Ayesha Khan', role: 'MSc Bioinformatics', avatar: '/placeholder.svg', rating: 5, text: 'The courses are incredibly well-structured and practical. I got my first research internship after completing the Genomics track.' },
@@ -261,6 +332,7 @@ const Homepage = () => {
 	return (
 		<div className="min-h-screen bg-background">
 			<HomeHero />
+			<Upcoming />
 			<FeaturedCourses />
 			<Testimonials />
 			<WhyUs />

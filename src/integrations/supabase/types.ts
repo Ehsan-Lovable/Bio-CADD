@@ -91,6 +91,7 @@ export type Database = {
           id: string
           language: string | null
           module_count: number | null
+          upcoming: boolean | null
           poster_url: string | null
           price_offer: number | null
           price_regular: number | null
@@ -119,6 +120,7 @@ export type Database = {
           id?: string
           language?: string | null
           module_count?: number | null
+          upcoming?: boolean | null
           poster_url?: string | null
           price_offer?: number | null
           price_regular?: number | null
@@ -147,6 +149,7 @@ export type Database = {
           id?: string
           language?: string | null
           module_count?: number | null
+          upcoming?: boolean | null
           poster_url?: string | null
           price_offer?: number | null
           price_regular?: number | null

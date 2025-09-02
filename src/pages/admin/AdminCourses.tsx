@@ -288,6 +288,23 @@ const AdminCoursesIndex = () => {
       icon: Eye
     },
     {
+      label: 'Toggle Upcoming',
+      onClick: async (course: any) => {
+        try {
+          const { error } = await supabase
+            .from('courses')
+            .update({ upcoming: !course.upcoming })
+            .eq('id', course.id);
+          if (error) throw error;
+          queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
+          toast.success(`Course ${!course.upcoming ? 'added to' : 'removed from'} Upcoming`);
+        } catch (e: any) {
+          toast.error(e.message || 'Failed to toggle upcoming');
+        }
+      },
+      icon: MoreHorizontal
+    },
+    {
       label: 'Edit',
       onClick: (course: any) => navigate(`/admin/courses/edit/${course.id}`),
       icon: Edit
