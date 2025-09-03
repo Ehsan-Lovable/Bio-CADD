@@ -24,35 +24,60 @@ export default function AdminSubmissions() {
       
       // Extract the file path from the URL
       const urlObj = new URL(url);
-      const pathParts = urlObj.pathname.split('/').filter(part => part);
+      console.log('Full URL pathname:', urlObj.pathname);
       
-      console.log('URL parts:', pathParts);
+      // Different possible URL formats:
+      // Format 1: /storage/v1/object/public/documents/userId/filename
+      // Format 2: /storage/v1/object/sign/documents/userId/filename  
+      // Format 3: Direct public URL format
       
-      // Look for the file path after 'documents' in the URL
       let filePath = '';
+      
+      // Try to extract path after 'documents'
+      const pathParts = urlObj.pathname.split('/').filter(part => part);
+      console.log('URL path parts:', pathParts);
+      
       const documentsIndex = pathParts.findIndex(part => part === 'documents');
       
       if (documentsIndex !== -1 && documentsIndex < pathParts.length - 1) {
         // Get everything after 'documents'
         filePath = pathParts.slice(documentsIndex + 1).join('/');
-        console.log('Extracted file path:', filePath);
-        
-        // Try to create a signed URL for admin access
-        const { data, error } = await supabase.storage
-          .from('documents')
-          .createSignedUrl(filePath, 3600);
-        
-        if (!error && data?.signedUrl) {
-          console.log('Successfully created signed URL');
-          window.open(data.signedUrl, '_blank');
-          return;
-        } else {
-          console.warn('Signed URL creation failed:', error);
-          toast.error(`Failed to generate secure link: ${error?.message || 'Unknown error'}`);
-        }
+        console.log('Extracted file path from URL:', filePath);
       } else {
-        console.error('Invalid URL format - cannot extract file path');
+        // Alternative: try to extract from the end if it's a direct file URL
+        const filenamePart = pathParts[pathParts.length - 1];
+        const userIdPart = pathParts[pathParts.length - 2];
+        if (filenamePart && userIdPart) {
+          filePath = `${userIdPart}/${filenamePart}`;
+          console.log('Alternative file path extraction:', filePath);
+        }
+      }
+      
+      if (!filePath) {
+        console.error('Could not extract file path from URL');
         toast.error('Invalid screenshot URL format');
+        return;
+      }
+      
+      // Try to create a signed URL for admin access
+      console.log('Attempting to create signed URL for path:', filePath);
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .createSignedUrl(filePath, 3600);
+      
+      if (!error && data?.signedUrl) {
+        console.log('Successfully created signed URL');
+        window.open(data.signedUrl, '_blank');
+        return;
+      } else {
+        console.error('Signed URL creation failed:', error);
+        console.log('File path that failed:', filePath);
+        
+        // Try to list files in the bucket to debug
+        const { data: files } = await supabase.storage.from('documents').list('', { limit: 10 });
+        console.log('Files in documents bucket:', files);
+        
+        toast.error(`Failed to generate secure link: ${error?.message || 'Unknown error'}`);
       }
       
       // Fallback: try to open the original URL
