@@ -26,14 +26,6 @@ export default function AdminSubmissions() {
       const urlObj = new URL(url);
       console.log('Full URL pathname:', urlObj.pathname);
       
-      // Different possible URL formats:
-      // Format 1: /storage/v1/object/public/documents/userId/filename
-      // Format 2: /storage/v1/object/sign/documents/userId/filename  
-      // Format 3: Direct public URL format
-      
-      let filePath = '';
-      
-      // Try to extract path after 'documents'
       const pathParts = urlObj.pathname.split('/').filter(part => part);
       console.log('URL path parts:', pathParts);
       
@@ -41,54 +33,52 @@ export default function AdminSubmissions() {
       
       if (documentsIndex !== -1 && documentsIndex < pathParts.length - 1) {
         // Get everything after 'documents'
-        filePath = pathParts.slice(documentsIndex + 1).join('/');
+        const filePath = pathParts.slice(documentsIndex + 1).join('/');
         console.log('Extracted file path from URL:', filePath);
-      } else {
-        // Alternative: try to extract from the end if it's a direct file URL
-        const filenamePart = pathParts[pathParts.length - 1];
-        const userIdPart = pathParts[pathParts.length - 2];
-        if (filenamePart && userIdPart) {
-          filePath = `${userIdPart}/${filenamePart}`;
-          console.log('Alternative file path extraction:', filePath);
+        
+        // Try to create a signed URL for admin access
+        console.log('Attempting to create signed URL for path:', filePath);
+        const { data, error } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(filePath, 3600);
+        
+        if (!error && data?.signedUrl) {
+          console.log('Successfully created signed URL');
+          // Show image in a modal or new window
+          const img = new Image();
+          img.onload = () => {
+            const newWindow = window.open('', '_blank');
+            if (newWindow) {
+              newWindow.document.write(`
+                <html>
+                  <head><title>Payment Screenshot</title></head>
+                  <body style="margin:0; padding:20px; background:#f0f0f0; display:flex; justify-content:center; align-items:center;">
+                    <img src="${data.signedUrl}" style="max-width:100%; max-height:100vh; object-fit:contain;" alt="Payment Screenshot" />
+                  </body>
+                </html>
+              `);
+              newWindow.document.close();
+            } else {
+              toast.error('Popup blocked. Please allow popups for this site.');
+            }
+          };
+          img.onerror = () => {
+            toast.error('Failed to load image');
+          };
+          img.src = data.signedUrl;
+          return;
+        } else {
+          console.error('Signed URL creation failed:', error);
+          toast.error(`Failed to generate secure link: ${error?.message || 'Object not found'}`);
         }
-      }
-      
-      if (!filePath) {
-        console.error('Could not extract file path from URL');
-        toast.error('Invalid screenshot URL format');
-        return;
-      }
-      
-      // Try to create a signed URL for admin access
-      console.log('Attempting to create signed URL for path:', filePath);
-      const { data, error } = await supabase.storage
-        .from('documents')
-        .createSignedUrl(filePath, 3600);
-      
-      if (!error && data?.signedUrl) {
-        console.log('Successfully created signed URL');
-        window.open(data.signedUrl, '_blank');
-        return;
       } else {
-        console.error('Signed URL creation failed:', error);
-        console.log('File path that failed:', filePath);
-        
-        // Try to list files in the bucket to debug
-        const { data: files } = await supabase.storage.from('documents').list('', { limit: 10 });
-        console.log('Files in documents bucket:', files);
-        
-        toast.error(`Failed to generate secure link: ${error?.message || 'Unknown error'}`);
+        console.error('Invalid URL format - cannot extract file path');
+        toast.error('Invalid screenshot URL format');
       }
-      
-      // Fallback: try to open the original URL
-      console.log('Attempting fallback: opening original URL');
-      window.open(url, '_blank');
       
     } catch (error: any) {
       console.error('Error viewing screenshot:', error);
       toast.error(`Error accessing screenshot: ${error.message}`);
-      // Final fallback
-      window.open(url, '_blank');
     }
   };
 
@@ -767,6 +757,22 @@ export default function AdminSubmissions() {
                     )}
                   </div>
                 </div>
+
+                {selectedSubmission.payment_screenshot_url && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Payment Screenshot</label>
+                    <div className="mt-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewScreenshot(selectedSubmission.payment_screenshot_url)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        View Payment Screenshot
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="text-sm font-medium text-gray-700">Submitted At</label>
