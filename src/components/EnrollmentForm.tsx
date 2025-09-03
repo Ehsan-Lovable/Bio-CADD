@@ -87,8 +87,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Full Name',
       field_options: [],
       is_required: true,
-      field_order: 1,
-      is_active: true
+      field_order: 1
     },
     {
       id: 'default-2',
@@ -97,8 +96,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Email',
       field_options: [],
       is_required: true,
-      field_order: 2,
-      is_active: true
+      field_order: 2
     },
     {
       id: 'default-3',
@@ -107,8 +105,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Discipline',
       field_options: [],
       is_required: true,
-      field_order: 3,
-      is_active: true
+      field_order: 3
     },
     {
       id: 'default-4',
@@ -117,8 +114,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'University',
       field_options: [],
       is_required: true,
-      field_order: 4,
-      is_active: true
+      field_order: 4
     },
     {
       id: 'default-5',
@@ -127,8 +123,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Phone',
       field_options: [],
       is_required: true,
-      field_order: 5,
-      is_active: true
+      field_order: 5
     },
     {
       id: 'default-6',
@@ -137,8 +132,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Messenger/WhatsApp',
       field_options: [],
       is_required: true,
-      field_order: 6,
-      is_active: true
+      field_order: 6
     },
     {
       id: 'default-7',
@@ -147,8 +141,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Telegram',
       field_options: [],
       is_required: false,
-      field_order: 7,
-      is_active: true
+      field_order: 7
     },
     {
       id: 'default-8',
@@ -170,8 +163,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
         'Uruguay', 'Venezuela', 'Vietnam', 'Yemen', 'Other'
       ],
       is_required: true,
-      field_order: 8,
-      is_active: true
+      field_order: 8
     },
     {
       id: 'default-9',
@@ -180,8 +172,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Current State',
       field_options: [],
       is_required: true,
-      field_order: 9,
-      is_active: true
+      field_order: 9
     },
     {
       id: 'default-10',
@@ -190,8 +181,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Current City',
       field_options: [],
       is_required: true,
-      field_order: 10,
-      is_active: true
+      field_order: 10
     },
     {
       id: 'default-11',
@@ -200,8 +190,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Academic/Professional Status',
       field_options: ['Undergraduate Student', 'Graduate Student', 'PhD Student', 'Postdoc', 'Faculty/Professor', 'Industry Professional', 'Research Scientist', 'Other'],
       is_required: true,
-      field_order: 11,
-      is_active: true
+      field_order: 11
     },
     {
       id: 'default-12',
@@ -210,8 +199,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Experience',
       field_options: ['Beginner (0-1 years)', 'Intermediate (1-3 years)', 'Advanced (3-5 years)', 'Expert (5+ years)'],
       is_required: true,
-      field_order: 12,
-      is_active: true
+      field_order: 12
     },
     {
       id: 'default-13',
@@ -220,8 +208,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Comments',
       field_options: [],
       is_required: false,
-      field_order: 13,
-      is_active: true
+      field_order: 13
     },
     {
       id: 'default-14',
@@ -230,8 +217,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Preferred Payment Method',
       field_options: ['UPI', 'PayPal', 'Bkash'],
       is_required: true,
-      field_order: 14,
-      is_active: true
+      field_order: 14
     },
     {
       id: 'default-15',
@@ -240,8 +226,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
       field_label: 'Payment Screenshot',
       field_options: [],
       is_required: true,
-      field_order: 15,
-      is_active: true
+      field_order: 15
     }
   ];
 
