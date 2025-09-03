@@ -415,21 +415,21 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
                     </h3>
                     <div className="grid grid-cols-3 gap-4">
                       <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                        <div className="w-12 h-12 mx-auto mb-2 bg-white rounded-lg flex items-center justify-center p-1">
+                        <div className="w-20 h-20 mx-auto mb-2 bg-white rounded-lg flex items-center justify-center p-2">
                           <img src={upiLogo} alt="UPI" className="w-full h-full object-contain" />
                         </div>
                         <p className="text-xs text-gray-600">UPI</p>
                         <p className="font-mono text-xs font-medium mt-1">9123799685@axisb</p>
                       </div>
                       <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                        <div className="w-12 h-12 mx-auto mb-2 bg-white rounded-lg flex items-center justify-center p-1">
+                        <div className="w-20 h-20 mx-auto mb-2 bg-white rounded-lg flex items-center justify-center p-2">
                           <img src={paypalLogo} alt="PayPal" className="w-full h-full object-contain" />
                         </div>
                         <p className="text-xs text-gray-600">PayPal (int.)</p>
                         <p className="font-mono text-xs font-medium mt-1">hsifat14@gmail.com</p>
                       </div>
                       <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                        <div className="w-12 h-12 mx-auto mb-2 bg-white rounded-lg flex items-center justify-center p-1">
+                        <div className="w-20 h-20 mx-auto mb-2 bg-white rounded-lg flex items-center justify-center p-2">
                           <img src={bkashLogo} alt="bKash" className="w-full h-full object-contain" />
                         </div>
                         <p className="text-xs text-gray-600">Bkash</p>
