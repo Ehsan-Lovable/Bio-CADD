@@ -85,12 +85,6 @@ const sidebarItems = [
     name: 'Blog Management', 
     path: '/admin/blog', 
     icon: BlogIcon 
-  },
-
-  { 
-    name: 'TEST ITEM', 
-    path: '/admin/test', 
-    icon: FileText 
   }
 ];
 
