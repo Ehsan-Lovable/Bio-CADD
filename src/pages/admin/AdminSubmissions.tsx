@@ -22,24 +22,6 @@ export default function AdminSubmissions() {
     try {
       console.log('Attempting to view screenshot:', url);
       
-      // Check if the documents bucket exists first
-      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-      
-      if (bucketError) {
-        console.error('Error listing buckets:', bucketError);
-        toast.error('Unable to access storage. Please contact support.');
-        return;
-      }
-      
-      const documentsBucket = buckets?.find(bucket => bucket.id === 'documents');
-      if (!documentsBucket) {
-        console.error('Documents bucket not found');
-        toast.error('Storage bucket "documents" not found. Please apply the storage migration first.');
-        // Try to open the URL directly as fallback
-        window.open(url, '_blank');
-        return;
-      }
-      
       // Extract the file path from the URL
       const urlObj = new URL(url);
       const pathParts = urlObj.pathname.split('/').filter(part => part);
@@ -73,9 +55,15 @@ export default function AdminSubmissions() {
         toast.error('Invalid screenshot URL format');
       }
       
+      // Fallback: try to open the original URL
+      console.log('Attempting fallback: opening original URL');
+      window.open(url, '_blank');
+      
     } catch (error: any) {
       console.error('Error viewing screenshot:', error);
       toast.error(`Error accessing screenshot: ${error.message}`);
+      // Final fallback
+      window.open(url, '_blank');
     }
   };
 
