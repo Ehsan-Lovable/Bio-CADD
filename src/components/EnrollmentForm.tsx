@@ -416,21 +416,21 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
                           <span className="text-blue-600 font-bold text-sm">UPI</span>
                         </div>
                         <p className="text-xs text-gray-600">UPI</p>
-                        <p className="font-mono text-xs font-medium mt-1">9123999858@xiiB</p>
+                        <p className="font-mono text-xs font-medium mt-1">9123799685@axisb</p>
                       </div>
                       <div className="text-center p-3 bg-white rounded-lg shadow-sm">
                         <div className="w-12 h-12 mx-auto mb-2 bg-blue-500 rounded-lg flex items-center justify-center">
                           <span className="text-white font-bold text-xs">PP</span>
                         </div>
                         <p className="text-xs text-gray-600">PayPal (int.)</p>
-                        <p className="font-mono text-xs font-medium mt-1">haifa114@gmail.com</p>
+                        <p className="font-mono text-xs font-medium mt-1">hsifat14@gmail.com</p>
                       </div>
                       <div className="text-center p-3 bg-white rounded-lg shadow-sm">
                         <div className="w-12 h-12 mx-auto mb-2 bg-pink-500 rounded-lg flex items-center justify-center">
                           <span className="text-white font-bold text-xs">bK</span>
                         </div>
                         <p className="text-xs text-gray-600">Bkash</p>
-                        <p className="font-mono text-xs font-medium mt-1">+8801994256422</p>
+                        <p className="font-mono text-xs font-medium mt-1">+8801994236422</p>
                       </div>
                     </div>
                   </div>
