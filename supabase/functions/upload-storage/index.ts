@@ -121,6 +121,20 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Additional validation for public buckets (restrict to images)
+    if (['avatars', 'course-posters', 'portfolio-images'].includes(bucket)) {
+      if (!file.type.startsWith('image/')) {
+        console.log('Invalid file type for public bucket:', file.type)
+        return new Response(
+          JSON.stringify({ error: 'Only image files are allowed for this bucket' }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+    }
+
     // Validate file size (10MB limit)
     const maxSize = 10 * 1024 * 1024 // 10MB
     if (file.size > maxSize) {
