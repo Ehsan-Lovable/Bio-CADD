@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      batch_participants: {
+        Row: {
+          attendance_percentage: number | null
+          batch_id: string
+          certificate_issued: boolean | null
+          completion_date: string | null
+          completion_status: string
+          created_at: string
+          enrollment_date: string
+          final_grade: string | null
+          id: string
+          participant_email: string
+          participant_name: string
+          user_id: string
+        }
+        Insert: {
+          attendance_percentage?: number | null
+          batch_id: string
+          certificate_issued?: boolean | null
+          completion_date?: string | null
+          completion_status?: string
+          created_at?: string
+          enrollment_date?: string
+          final_grade?: string | null
+          id?: string
+          participant_email: string
+          participant_name: string
+          user_id: string
+        }
+        Update: {
+          attendance_percentage?: number | null
+          batch_id?: string
+          certificate_issued?: boolean | null
+          completion_date?: string | null
+          completion_status?: string
+          created_at?: string
+          enrollment_date?: string
+          final_grade?: string | null
+          id?: string
+          participant_email?: string
+          participant_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_participants_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "course_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       career_applications: {
         Row: {
           cover_letter: string | null
@@ -115,15 +168,17 @@ export type Database = {
       }
       certificates: {
         Row: {
+          batch_id: string | null
           certificate_number: string
           completed_at: string | null
-          course_id: string
+          course_id: string | null
           created_at: string
           id: string
           issued_at: string
           issued_by: string | null
           metadata: Json | null
           pdf_url: string | null
+          qr_code_data: string | null
           revoked_at: string | null
           revoked_by: string | null
           revoked_reason: string | null
@@ -133,15 +188,17 @@ export type Database = {
           verification_hash: string
         }
         Insert: {
+          batch_id?: string | null
           certificate_number: string
           completed_at?: string | null
-          course_id: string
+          course_id?: string | null
           created_at?: string
           id?: string
           issued_at?: string
           issued_by?: string | null
           metadata?: Json | null
           pdf_url?: string | null
+          qr_code_data?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           revoked_reason?: string | null
@@ -151,15 +208,17 @@ export type Database = {
           verification_hash: string
         }
         Update: {
+          batch_id?: string | null
           certificate_number?: string
           completed_at?: string | null
-          course_id?: string
+          course_id?: string | null
           created_at?: string
           id?: string
           issued_at?: string
           issued_by?: string | null
           metadata?: Json | null
           pdf_url?: string | null
+          qr_code_data?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           revoked_reason?: string | null
@@ -168,7 +227,15 @@ export type Database = {
           user_id?: string
           verification_hash?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "certificates_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "course_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_messages: {
         Row: {
@@ -196,6 +263,59 @@ export type Database = {
           subject?: string | null
         }
         Relationships: []
+      }
+      course_batches: {
+        Row: {
+          batch_name: string
+          batch_number: string
+          course_id: string
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          instructor_name: string | null
+          max_participants: number | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          batch_name: string
+          batch_number: string
+          course_id: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          instructor_name?: string | null
+          max_participants?: number | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          batch_name?: string
+          batch_number?: string
+          course_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          instructor_name?: string | null
+          max_participants?: number | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_batches_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       courses: {
         Row: {
@@ -820,6 +940,14 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      issue_batch_certificate: {
+        Args: { p_batch_id: string; p_issued_by?: string; p_user_id: string }
+        Returns: string
+      }
+      issue_batch_certificates: {
+        Args: { p_batch_id: string; p_issued_by?: string }
+        Returns: number
       }
     }
     Enums: {

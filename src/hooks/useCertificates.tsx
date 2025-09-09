@@ -6,24 +6,34 @@ import { toast } from 'sonner';
 export interface Certificate {
   id: string;
   user_id: string;
-  course_id: string;
+  course_id?: string;
+  batch_id?: string;
   certificate_number: string;
-  issued_at: string;
-  completed_at: string;
-  status: 'active' | 'revoked';
   verification_hash: string;
-  pdf_url?: string;
-  metadata: any;
+  qr_code_data?: string;
+  status: 'active' | 'revoked';
+  issued_at: string;
+  completed_at?: string;
   issued_by?: string;
   revoked_at?: string;
   revoked_by?: string;
   revoked_reason?: string;
+  pdf_url?: string;
+  metadata?: any;
+  created_at?: string;
+  updated_at?: string;
   courses?: {
     title: string;
+    slug?: string;
     poster_url?: string;
   };
+  course_batches?: {
+    batch_name: string;
+    instructor_name?: string;
+  };
   profiles?: {
-    full_name: string;
+    full_name?: string;
+    avatar_url?: string;
     id?: string;
   };
 }
