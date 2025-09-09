@@ -22,6 +22,7 @@ import Career from "./pages/Career";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import CertificateVerify from "./pages/CertificateVerify";
+import MyCertificates from "./pages/MyCertificates";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="student">
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/certificates" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <MyCertificates />
                 </ProtectedRoute>
               } 
             />

@@ -16,7 +16,8 @@ import {
   X,
   Briefcase,
   Calendar,
-  FileText as BlogIcon
+  FileText as BlogIcon,
+  Award
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -32,6 +33,7 @@ import AdminUsers from './admin/AdminUsers';
 import AdminSiteSettings from './admin/AdminSiteSettings';
 import AdminBlog from './admin/AdminBlog';
 import AdminSystemOverview from './admin/AdminSystemOverview';
+import AdminCertificates from './admin/AdminCertificates';
 
 
 const sidebarItems = [
@@ -75,6 +77,11 @@ const sidebarItems = [
     name: 'Users', 
     path: '/admin/users', 
     icon: Users 
+  },
+  { 
+    name: 'Certificates', 
+    path: '/admin/certificates', 
+    icon: Award 
   },
   { 
     name: 'Site Settings', 
@@ -211,6 +218,7 @@ export default function Admin() {
             <Route path="submissions" element={<AdminSubmissions />} />
             <Route path="enrollment-forms" element={<AdminEnrollmentForms />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="certificates" element={<AdminCertificates />} />
             <Route path="settings" element={<AdminSiteSettings />} />
             {/* Upcoming sessions removed */}
             <Route path="blog/*" element={<AdminBlog />} />
