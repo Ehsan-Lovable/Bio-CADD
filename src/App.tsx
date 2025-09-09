@@ -21,6 +21,7 @@ import Contact from "./pages/Contact";
 import Career from "./pages/Career";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import CertificateVerify from "./pages/CertificateVerify";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/career" element={<Career />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/verify-certificate" element={<CertificateVerify />} />
             <Route 
               path="/dashboard" 
               element={

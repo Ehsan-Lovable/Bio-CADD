@@ -5,12 +5,15 @@ import { StatCard } from '@/components/StatCard';
 import { EmptyState } from '@/components/EmptyState';
 import { useOptimizedDashboardData } from '@/hooks/useOptimizedDashboardData';
 import { useAuth } from '@/hooks/useAuth';
+import { useCertificates } from '@/hooks/useCertificates';
+import { CertificateCard } from '@/components/CertificateCard';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   BookOpen, 
   Award, 
   Clock, 
-  Trophy, 
+  Trophy,
+  Download,
   Play, 
   FileText, 
   Users, 
@@ -20,11 +23,29 @@ import {
   LogOut
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export default function Dashboard() {
   const { user, userProfile } = useAuth();
   const { stats, enrolledCourses, recentActivity, isLoading } = useOptimizedDashboardData();
+  const { getUserCertificates, downloadCertificate } = useCertificates();
   const navigate = useNavigate();
+  
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [certificatesLoading, setCertificatesLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCertificates = async () => {
+      if (user) {
+        setCertificatesLoading(true);
+        const userCertificates = await getUserCertificates();
+        setCertificates(userCertificates);
+        setCertificatesLoading(false);
+      }
+    };
+    
+    fetchCertificates();
+  }, [user]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -223,6 +244,57 @@ export default function Dashboard() {
                         </Button>
                       </div>
                     ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Certificates */}
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  My Certificates
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {certificatesLoading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 2 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-32 bg-muted rounded-lg"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (!certificates || certificates.length === 0) ? (
+                  <EmptyState
+                    icon={Award}
+                    title="No certificates yet"
+                    description="Complete courses to earn certificates"
+                    size="sm"
+                  />
+                ) : (
+                  <div className="space-y-4">
+                    {certificates.slice(0, 3).map((certificate) => (
+                      <CertificateCard
+                        key={certificate.id}
+                        certificate={certificate}
+                        onDownload={downloadCertificate}
+                        showActions={true}
+                      />
+                    ))}
+                    {certificates.length > 3 && (
+                      <div className="text-center pt-4">
+                        <Link to="/dashboard/certificates">
+                          <Button variant="outline" size="sm">
+                            View All Certificates ({certificates.length})
+                            <ChevronRight className="h-4 w-4 ml-2" />
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
