@@ -50,6 +50,126 @@ export type Database = {
         }
         Relationships: []
       }
+      certificate_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          template_data: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          template_data?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          template_data?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      certificate_verifications: {
+        Row: {
+          certificate_id: string
+          created_at: string
+          id: string
+          verified_at: string
+          verifier_info: Json | null
+          verifier_ip: string | null
+        }
+        Insert: {
+          certificate_id: string
+          created_at?: string
+          id?: string
+          verified_at?: string
+          verifier_info?: Json | null
+          verifier_ip?: string | null
+        }
+        Update: {
+          certificate_id?: string
+          created_at?: string
+          id?: string
+          verified_at?: string
+          verifier_info?: Json | null
+          verifier_ip?: string | null
+        }
+        Relationships: []
+      }
+      certificates: {
+        Row: {
+          certificate_number: string
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          id: string
+          issued_at: string
+          issued_by: string | null
+          metadata: Json | null
+          pdf_url: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          revoked_reason: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          verification_hash: string
+        }
+        Insert: {
+          certificate_number: string
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          metadata?: Json | null
+          pdf_url?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          verification_hash: string
+        }
+        Update: {
+          certificate_number?: string
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          metadata?: Json | null
+          pdf_url?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          verification_hash?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -689,6 +809,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_certificate_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_verification_hash: {
+        Args: { cert_id: string; course_id: string; user_id: string }
+        Returns: string
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
