@@ -108,6 +108,19 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Validate bucket against allowlist
+    const allowedBuckets = ['avatars', 'course-posters', 'portfolio-images', 'portfolio-files', 'documents']
+    if (!allowedBuckets.includes(bucket)) {
+      console.log('Invalid bucket:', bucket)
+      return new Response(
+        JSON.stringify({ error: 'Invalid bucket name' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
     // Validate file size (10MB limit)
     const maxSize = 10 * 1024 * 1024 // 10MB
     if (file.size > maxSize) {

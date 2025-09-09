@@ -1,4 +1,5 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 
 interface RichTextViewerProps {
   content: string;
@@ -15,7 +16,24 @@ export function MarkdownViewer({ content, className = '' }: RichTextViewerProps)
       return `<p class="mb-4 leading-relaxed">${html}</p>`;
     }
     
-    return html;
+    // Sanitize HTML to prevent XSS attacks
+    const sanitized = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'code', 'pre', 'blockquote'],
+      ALLOWED_ATTR: ['href', 'class'],
+      ALLOW_DATA_ATTR: false,
+      FORBID_ATTR: ['style', 'onclick', 'onerror', 'onload']
+    });
+    
+    // Post-process to make links safe
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = sanitized;
+    const links = tempDiv.querySelectorAll('a');
+    links.forEach(link => {
+      link.setAttribute('rel', 'noopener noreferrer');
+      link.setAttribute('target', '_blank');
+    });
+    
+    return tempDiv.innerHTML;
   };
 
   return (
