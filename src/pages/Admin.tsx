@@ -31,6 +31,7 @@ import AdminEnrollmentForms from './admin/AdminEnrollmentForms';
 import AdminUsers from './admin/AdminUsers';
 import AdminSiteSettings from './admin/AdminSiteSettings';
 import AdminBlog from './admin/AdminBlog';
+import AdminSystemOverview from './admin/AdminSystemOverview';
 
 
 const sidebarItems = [
@@ -85,6 +86,11 @@ const sidebarItems = [
     name: 'Blog Management', 
     path: '/admin/blog', 
     icon: BlogIcon 
+  },
+  { 
+    name: 'System Overview', 
+    path: '/admin/system-overview', 
+    icon: FileText 
   }
 ];
 
@@ -208,6 +214,7 @@ export default function Admin() {
             <Route path="settings" element={<AdminSiteSettings />} />
             {/* Upcoming sessions removed */}
             <Route path="blog/*" element={<AdminBlog />} />
+            <Route path="system-overview" element={<AdminSystemOverview />} />
 
           </Routes>
         </div>
