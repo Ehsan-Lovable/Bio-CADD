@@ -51,8 +51,9 @@ export const useCertificates = () => {
         .from('certificates')
         .select(`
           *,
-          courses!inner(title, poster_url),
-          profiles!inner(full_name)
+          courses(title, slug, poster_url),
+          course_batches(batch_name, instructor_name),
+          profiles(full_name, avatar_url, id)
         `)
         .eq('user_id', userId || session.user.id)
         .eq('status', 'active')
@@ -76,8 +77,9 @@ export const useCertificates = () => {
         .from('certificates')
         .select(`
           *,
-          courses!inner(title, poster_url),
-          profiles!inner(full_name, id)
+          courses(title, poster_url),
+          course_batches(batch_name, instructor_name),
+          profiles(full_name, id)
         `)
         .order('issued_at', { ascending: false });
 
@@ -101,8 +103,9 @@ export const useCertificates = () => {
         .from('certificates')
         .select(`
           *,
-          courses!inner(title, poster_url),
-          profiles!inner(full_name)
+          courses(title, poster_url),
+          course_batches(batch_name, instructor_name),
+          profiles(full_name)
         `)
         .eq('certificate_number', certificateNumber)
         .eq('verification_hash', verificationHash)
@@ -187,8 +190,9 @@ export const useCertificates = () => {
         })
         .select(`
           *,
-          courses!inner(title, poster_url),
-          profiles!inner(full_name)
+          courses(title, poster_url),
+          course_batches(batch_name, instructor_name),
+          profiles(full_name)
         `)
         .single();
 
