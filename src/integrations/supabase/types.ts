@@ -236,6 +236,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_certificates_batch_id"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "course_batches"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_certificates_course_id"
             columns: ["course_id"]
             isOneToOne: false
