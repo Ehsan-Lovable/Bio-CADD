@@ -878,6 +878,27 @@ export type Database = {
           },
         ]
       }
+      schema_versions: {
+        Row: {
+          applied_at: string | null
+          description: string | null
+          id: number
+          version_name: string
+        }
+        Insert: {
+          applied_at?: string | null
+          description?: string | null
+          id?: number
+          version_name: string
+        }
+        Update: {
+          applied_at?: string | null
+          description?: string | null
+          id?: number
+          version_name?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           hero_cta_label: string | null
@@ -943,6 +964,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      force_schema_cache_refresh: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_certificate_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -962,6 +987,16 @@ export type Database = {
       issue_batch_certificates: {
         Args: { p_batch_id: string; p_issued_by?: string }
         Returns: number
+      }
+      verify_schema_relationships: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          column_name: string
+          constraint_count: number
+          foreign_table: string
+          status: string
+          table_name: string
+        }[]
       }
     }
     Enums: {
