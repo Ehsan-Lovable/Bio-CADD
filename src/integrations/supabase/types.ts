@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          id: string
+          ip_address: string | null
+          new_values: Json | null
+          old_values: Json | null
+          performed_at: string | null
+          performed_by: string | null
+          record_id: string | null
+          table_name: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          id?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_at?: string | null
+          performed_by?: string | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          id?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_at?: string | null
+          performed_by?: string | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       batch_participants: {
         Row: {
           attendance_percentage: number | null
@@ -964,6 +1006,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      detect_suspicious_activity: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          activity_type: string
+          count: number
+          time_window: string
+          user_id: string
+        }[]
+      }
       force_schema_cache_refresh: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -987,6 +1038,13 @@ export type Database = {
       issue_batch_certificates: {
         Args: { p_batch_id: string; p_issued_by?: string }
         Returns: number
+      }
+      secure_update_user_role: {
+        Args: {
+          new_role: Database["public"]["Enums"]["user_role"]
+          target_user_id: string
+        }
+        Returns: boolean
       }
       verify_schema_relationships: {
         Args: Record<PropertyKey, never>

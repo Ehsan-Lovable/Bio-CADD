@@ -49,18 +49,20 @@ export default function AdminUsers() {
     }
   });
 
+  // Secure user role update mutation using the secure function
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, newRole }: { userId: string; newRole: 'admin' | 'student' }) => {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
+      const { data, error } = await supabase.rpc('secure_update_user_role', {
+        target_user_id: userId,
+        new_role: newRole
+      });
       
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast.success('User role updated successfully');
+      toast.success('User role updated securely with audit logging');
       setPromoteDemoteDialogOpen(false);
       setSelectedUser(null);
     },
