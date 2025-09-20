@@ -178,7 +178,7 @@ const LatestCourses = () => {
 				setLoading(true);
 				const { data, error } = await supabase
 					.from('courses')
-					.select('id, title, slug, course_type, start_date, duration_text, poster_url, created_at')
+					.select('id, title, slug, course_type, start_date, duration_text, poster_url, difficulty, featured, created_at')
 					.eq('status', 'published')
 					.order('start_date', { ascending: true, nullsFirst: false })
 					.order('created_at', { ascending: false })
