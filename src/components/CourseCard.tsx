@@ -42,77 +42,79 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
   };
 
   return (
-    <Card className={`group overflow-hidden hover:shadow-mustard transition-all duration-300 ${isUpcoming ? 'ring-2 ring-orange-500/50 shadow-lg shadow-orange-500/20' : ''} ${className || ''}`}>
-      <Link to={`/courses/${course.slug}`}>
-        <div className="aspect-video bg-muted relative overflow-hidden">
+    <Card className={`group overflow-hidden bg-card border-border/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 rounded-xl ${isUpcoming ? 'ring-1 ring-orange-400/30 bg-orange-50/50 dark:bg-orange-950/10' : ''} ${className || ''}`}>
+      <Link to={`/courses/${course.slug}`} className="block">
+        {/* Compact Image Section */}
+        <div className="aspect-[4/3] bg-muted relative overflow-hidden">
           {course.poster_url ? (
             <img 
               src={course.poster_url} 
               alt={course.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <BookOpen className="h-16 w-16 text-primary/40" />
+            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+              <BookOpen className="h-12 w-12 text-muted-foreground/40" />
             </div>
           )}
-          <div className="absolute top-4 left-4 flex gap-2">
+          
+          {/* Compact Badge Section */}
+          <div className="absolute top-3 left-3">
             {isUpcoming && (
-              <Badge variant="destructive" className="bg-orange-500 hover:bg-orange-600 text-white font-bold">
+              <Badge className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium px-2 py-1">
                 UPCOMING
               </Badge>
             )}
-            <Badge variant={course.course_type === 'live' ? 'destructive' : 'secondary'}>
-              {course.course_type?.charAt(0).toUpperCase() + course.course_type?.slice(1) || 'Course'}
-            </Badge>
           </div>
+          
+          {/* Discount Badge */}
           {course.price_offer && course.price_regular && course.price_offer < course.price_regular && (
-            <div className="absolute top-4 right-4">
-              <Badge className="bg-danger text-white">
-                Save {Math.round(((course.price_regular - course.price_offer) / course.price_regular) * 100)}%
+            <div className="absolute top-3 right-3">
+              <Badge className="bg-red-500 text-white text-xs font-medium px-2 py-1">
+                {Math.round(((course.price_regular - course.price_offer) / course.price_regular) * 100)}% OFF
               </Badge>
             </div>
           )}
-          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <Play className="h-12 w-12 text-white" />
+          
+          {/* Course Type Badge - Bottom Left */}
+          <div className="absolute bottom-3 left-3">
+            <Badge variant="secondary" className="text-xs font-medium px-2 py-1 bg-background/90 backdrop-blur-sm">
+              {course.course_type?.charAt(0).toUpperCase() + course.course_type?.slice(1) || 'Course'}
+            </Badge>
           </div>
         </div>
       </Link>
       
-      <div className="p-6">
+      {/* Streamlined Content */}
+      <div className="p-4 space-y-3">
         <Link to={`/courses/${course.slug}`}>
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="font-heading font-semibold text-lg group-hover:text-primary transition-colors line-clamp-2">
-              {course.title}
-            </h3>
-          </div>
+          {/* Clean Title */}
+          <h3 className="font-semibold text-base leading-snug group-hover:text-primary transition-colors line-clamp-2 mb-2">
+            {course.title}
+          </h3>
           
+          {/* Compact Description */}
           {course.description && (
-            <div className="text-muted-foreground text-sm mb-4 line-clamp-2">
+            <div className="text-muted-foreground text-sm line-clamp-1 mb-3">
               <MarkdownViewer 
                 content={course.description} 
-                className="text-sm [&>p]:mb-1 [&>h1]:text-sm [&>h2]:text-sm [&>h3]:text-sm [&>strong]:font-medium"
+                className="text-sm [&>p]:mb-0 [&>h1]:text-sm [&>h2]:text-sm [&>h3]:text-sm [&>strong]:font-medium [&>*]:line-clamp-1"
               />
             </div>
           )}
           
-          <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-            {course.module_count && (
-              <span className="flex items-center gap-1">
-                <BookOpen className="h-3 w-3" />
-                {course.module_count} modules
-              </span>
-            )}
+          {/* Essential Metadata - Only Duration */}
+          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
             {course.duration_text && (
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 {course.duration_text}
               </span>
             )}
-            {course.certificate && (
+            {course.module_count && (
               <span className="flex items-center gap-1">
-                <Award className="h-3 w-3" />
-                Certificate
+                <BookOpen className="h-3 w-3" />
+                {course.module_count} modules
               </span>
             )}
             {course.difficulty && (
@@ -124,40 +126,40 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
           </div>
         </Link>
         
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            {course.price_regular && (
-              <div className="flex items-center gap-2">
+        {/* Compact Footer */}
+        <div className="flex items-center justify-between pt-2 border-t border-border/40">
+          {/* Pricing */}
+          <div className="flex items-baseline gap-2">
+            {course.price_regular ? (
+              <>
                 {course.price_offer && course.price_offer < course.price_regular ? (
                   <>
-                    <span className="font-bold text-lg text-primary">${course.price_offer}</span>
-                    <span className="text-sm text-muted-foreground line-through">${course.price_regular}</span>
+                    <span className="font-bold text-lg text-foreground">${course.price_offer}</span>
+                    <span className="text-xs text-muted-foreground line-through">${course.price_regular}</span>
                   </>
                 ) : (
-                  <span className="font-bold text-lg text-primary">${course.price_regular}</span>
+                  <span className="font-bold text-lg text-foreground">${course.price_regular}</span>
                 )}
-              </div>
-            )}
-            {!course.price_regular && (
+              </>
+            ) : (
               <span className="font-bold text-lg text-primary">Free</span>
             )}
           </div>
           
-          <div className="flex items-center gap-2">
-            {isEnrolled ? (
-              <Badge variant="default" className="bg-success text-white">
-                Enrolled
-              </Badge>
-            ) : (
-              <Button 
-                size="sm" 
-                onClick={handleEnrollClick}
-                className="ml-2"
-              >
-                Enroll Now
-              </Button>
-            )}
-          </div>
+          {/* Action Button */}
+          {isEnrolled ? (
+            <Badge variant="default" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-xs">
+              Enrolled
+            </Badge>
+          ) : (
+            <Button 
+              size="sm" 
+              onClick={handleEnrollClick}
+              className="text-xs px-3 py-1.5 h-auto"
+            >
+              Enroll
+            </Button>
+          )}
         </div>
       </div>
     </Card>
