@@ -124,10 +124,10 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
               Enrolled
             </Badge>
           ) : (
-            <Button asChild size="sm" className="text-xs h-auto">
+            <Button asChild variant="mustard" className="font-medium px-4 py-2">
               <Link to={`/courses/${course.slug}`}>
                 Explore
-                <ArrowRight className="ml-1 h-3 w-3" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           )}
