@@ -89,12 +89,6 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
             {course.title}
           </h3>
           
-          {/* Short Description */}
-          {course.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {course.description.replace(/[#*`]/g, '')}
-            </p>
-          )}
           
           {/* Metadata */}
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
