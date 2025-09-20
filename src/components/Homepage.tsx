@@ -106,7 +106,7 @@ const FeaturedCourses = () => {
 					.eq('status', 'published')
 					.order('featured', { ascending: false })
 					.order('created_at', { ascending: false })
-					.limit(8);
+					.limit(3);
 				
 				if (error) {
 					console.error('Error fetching featured courses:', error);
@@ -144,7 +144,7 @@ const FeaturedCourses = () => {
 					<p className="text-muted-foreground">No courses available yet.</p>
 				</div>
 			) : (
-				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{courses.map((course, i) => {
 						const isUpcoming = course.start_date && new Date(course.start_date) > new Date();
 						return (
@@ -211,7 +211,7 @@ const LatestCourses = () => {
 					.eq('status', 'published')
 					.order('start_date', { ascending: true, nullsFirst: false })
 					.order('created_at', { ascending: false })
-					.limit(8);
+					.limit(3);
 				
 				if (error) {
 					console.error('Error fetching latest courses:', error);
@@ -253,7 +253,7 @@ const LatestCourses = () => {
 					<p className="text-muted-foreground">No courses available yet. Check back soon!</p>
 				</div>
 			) : (
-				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{items.map((course, i) => {
 						const isUpcoming = course.start_date && new Date(course.start_date) > new Date();
 						return (
