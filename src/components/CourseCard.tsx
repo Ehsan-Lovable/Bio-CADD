@@ -52,7 +52,7 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
   return (
     <Card className={`group h-full overflow-hidden bg-background border shadow-sm hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 rounded-lg ${className || ''}`}>
       {/* Fixed Height Image */}
-      <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+      <div className="aspect-[3/2] bg-muted relative overflow-hidden">
         <img 
           src={course.poster_url || '/placeholder.svg'} 
           alt={course.title}
