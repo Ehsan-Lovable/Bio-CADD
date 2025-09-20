@@ -42,8 +42,8 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // Convert to 32bit integer
     }
-    // Generate rating between 3.5 and 5.0
-    const rating = 3.5 + (Math.abs(hash) % 16) / 10; // 0-1.5 range + 3.5 base
+    // Generate rating between 4.6 and 5.0
+    const rating = 4.6 + (Math.abs(hash) % 5) / 10; // 0-0.4 range + 4.6 base
     return Math.min(5.0, Math.round(rating * 10) / 10); // Round to 1 decimal, max 5.0
   };
   
