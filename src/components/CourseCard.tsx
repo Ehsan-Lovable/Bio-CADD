@@ -5,6 +5,7 @@ import { BookOpen, Clock, Star, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGatedContent } from '@/hooks/useGatedContent';
 import { useAuth } from '@/hooks/useAuth';
+import { StarRating } from '@/components/StarRating';
 
 interface CourseCardProps {
   course: {
@@ -32,6 +33,21 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
 
   // Check if course is upcoming (has a start_date in the future)
   const isUpcoming = course.start_date && new Date(course.start_date) > new Date();
+  
+  // Generate consistent rating based on course ID
+  const generateRating = (courseId: string) => {
+    let hash = 0;
+    for (let i = 0; i < courseId.length; i++) {
+      const char = courseId.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    // Generate rating between 3.5 and 5.0
+    const rating = 3.5 + (Math.abs(hash) % 16) / 10; // 0-1.5 range + 3.5 base
+    return Math.min(5.0, Math.round(rating * 10) / 10); // Round to 1 decimal, max 5.0
+  };
+  
+  const courseRating = generateRating(course.id);
 
   return (
     <Card className={`group h-full overflow-hidden bg-background border shadow-sm hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 rounded-lg ${className || ''}`}>
@@ -99,23 +115,8 @@ export const CourseCard = ({ course, className }: CourseCardProps) => {
         
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 mt-4 border-t">
-          {/* Pricing */}
-          <div className="flex items-baseline gap-2">
-            {course.price_regular ? (
-              <>
-                {course.price_offer && course.price_offer < course.price_regular ? (
-                  <>
-                    <span className="font-bold text-lg text-foreground">${course.price_offer}</span>
-                    <span className="text-xs text-muted-foreground line-through">${course.price_regular}</span>
-                  </>
-                ) : (
-                  <span className="font-bold text-lg text-foreground">${course.price_regular}</span>
-                )}
-              </>
-            ) : (
-              <span className="font-bold text-lg text-primary">Free</span>
-            )}
-          </div>
+          {/* Star Rating */}
+          <StarRating rating={courseRating} />
           
           {/* Action Button */}
           {isEnrolled ? (

@@ -123,17 +123,19 @@ const FeaturedCourses = () => {
 
 	return (
 		<section className="container mx-auto px-6 py-16 md:py-20">
-			<motion.div {...sectionFade} className="mb-10 flex items-end justify-between">
+			<motion.div {...sectionFade} className="mb-10 text-center">
 				<div>
 					<h2 className="text-2xl font-bold sm:text-3xl">Featured Courses</h2>
 					<p className="mt-2 text-muted-foreground">Premium courses designed by industry experts and researchers</p>
 				</div>
-				<Button asChild variant="ghost" className="group">
-					<Link to="/courses">
-						Browse all
-						<ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-					</Link>
-				</Button>
+				<div className="mt-4">
+					<Button asChild variant="ghost" className="group">
+						<Link to="/courses">
+							Browse all
+							<ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+						</Link>
+					</Button>
+				</div>
 			</motion.div>
 
 			{loading ? (
@@ -200,17 +202,19 @@ const LatestCourses = () => {
 
 	return (
 		<section className="container mx-auto px-6 pt-6 md:pt-10">
-			<motion.div {...sectionFade} className="mb-6 flex items-end justify-between">
+			<motion.div {...sectionFade} className="mb-6 text-center">
 				<div>
 					<h2 className="text-2xl font-bold sm:text-3xl">Latest Courses</h2>
 					<p className="mt-2 text-muted-foreground">Newest and upcoming courses from our catalog</p>
 				</div>
-				<Button asChild variant="ghost" className="group">
-					<Link to="/courses">
-						Browse all
-						<ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-					</Link>
-				</Button>
+				<div className="mt-4">
+					<Button asChild variant="ghost" className="group">
+						<Link to="/courses">
+							Browse all
+							<ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+						</Link>
+					</Button>
+				</div>
 			</motion.div>
 
 			{loading ? (
