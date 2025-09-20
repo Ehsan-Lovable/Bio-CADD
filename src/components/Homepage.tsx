@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowRight, Star, Sparkles, Play, Calendar, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
+import { CourseCard } from '@/components/CourseCard';
 
 const gradientText = 'bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent';
 
@@ -144,53 +145,21 @@ const FeaturedCourses = () => {
 					<p className="text-muted-foreground">No courses available yet.</p>
 				</div>
 			) : (
-				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{courses.map((course, i) => {
-						const isUpcoming = course.start_date && new Date(course.start_date) > new Date();
-						return (
-							<motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08, duration: 0.5 }} viewport={{ once: true }}>
-								<Card className="group relative overflow-hidden border-0 bg-gradient-to-b from-background/60 to-background/80 shadow-xl ring-1 ring-white/10">
-									<div className="absolute inset-0 -z-10 bg-[radial-gradient(1200px_200px_at_0%_0%,rgba(124,58,237,0.08),transparent_70%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-									<CardContent className="p-0">
-										<div className="relative aspect-[4/3] overflow-hidden">
-											<img src={course.poster_url || '/placeholder.svg'} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-											<div className="absolute left-3 top-3 flex gap-2">
-												{course.featured && (
-													<Badge variant="default" className="backdrop-blur font-bold bg-yellow-500 hover:bg-yellow-600">
-														FEATURED
-													</Badge>
-												)}
-												{isUpcoming && (
-													<Badge variant="destructive" className="backdrop-blur font-bold bg-orange-500 hover:bg-orange-600">
-														UPCOMING
-													</Badge>
-												)}
-												<Badge variant="secondary" className="backdrop-blur uppercase">
-													{course.course_type || 'COURSE'}
-												</Badge>
-											</div>
-										</div>
-										<div className="space-y-3 p-4">
-											<h3 className="line-clamp-2 text-base font-semibold">{course.title}</h3>
-											<p className="text-sm text-muted-foreground">
-												{course.start_date ? new Date(course.start_date).toLocaleDateString() : course.duration_text || 'Available now'}
-											</p>
-											<div className="flex items-center justify-between">
-												<p className="text-xs text-muted-foreground">
-													{course.difficulty ? `Level: ${course.difficulty}` : course.duration_text}
-												</p>
-												<Button asChild size="sm" className="group">
-													<Link to={`/courses/${course.slug}`}>
-														Explore <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-													</Link>
-												</Button>
-											</div>
-										</div>
-									</CardContent>
-								</Card>
+				<div className="mx-auto max-w-7xl">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+						{courses.map((course, i) => (
+							<motion.div 
+								key={course.id} 
+								initial={{ opacity: 0, y: 20 }} 
+								whileInView={{ opacity: 1, y: 0 }} 
+								transition={{ delay: i * 0.08, duration: 0.5 }} 
+								viewport={{ once: true }}
+								className="h-full"
+							>
+								<CourseCard course={course} className="h-full" />
 							</motion.div>
-						);
-					})}
+						))}
+					</div>
 				</div>
 			)}
 		</section>
@@ -253,45 +222,21 @@ const LatestCourses = () => {
 					<p className="text-muted-foreground">No courses available yet. Check back soon!</p>
 				</div>
 			) : (
-				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{items.map((course, i) => {
-						const isUpcoming = course.start_date && new Date(course.start_date) > new Date();
-						return (
-							<motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.45 }} viewport={{ once: true }}>
-								<Card className="group relative overflow-hidden border-0 bg-gradient-to-b from-background/60 to-background/80 shadow-xl ring-1 ring-white/10">
-									<CardContent className="p-0">
-										<div className="relative aspect-[4/3] overflow-hidden">
-											<img src={course.poster_url || '/placeholder.svg'} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-											<div className="absolute left-3 top-3 flex gap-2">
-												{isUpcoming && (
-													<Badge variant="destructive" className="backdrop-blur uppercase font-bold bg-orange-500 hover:bg-orange-600 text-white">
-														UPCOMING
-													</Badge>
-												)}
-												<Badge variant="secondary" className="backdrop-blur uppercase">
-													{course.course_type || 'LIVE'}
-												</Badge>
-											</div>
-										</div>
-									<div className="space-y-3 p-4">
-										<h3 className="line-clamp-2 text-base font-semibold">{course.title}</h3>
-										<p className="text-sm text-muted-foreground">
-											{course.start_date ? new Date(course.start_date).toLocaleDateString() : course.duration_text || 'Starting soon'}
-										</p>
-										<div className="flex items-center justify-between">
-											<p className="text-xs text-muted-foreground">{course.duration_text}</p>
-											<Button asChild size="sm" className="group">
-												<Link to={`/courses/${course.slug}`}>
-													Explore <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-												</Link>
-											</Button>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-						</motion.div>
-						);
-					})}
+				<div className="mx-auto max-w-7xl">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+						{items.map((course, i) => (
+							<motion.div 
+								key={course.id} 
+								initial={{ opacity: 0, y: 20 }} 
+								whileInView={{ opacity: 1, y: 0 }} 
+								transition={{ delay: i * 0.06, duration: 0.45 }} 
+								viewport={{ once: true }}
+								className="h-full"
+							>
+								<CourseCard course={course} className="h-full" />
+							</motion.div>
+						))}
+					</div>
 				</div>
 			)}
 		</section>
