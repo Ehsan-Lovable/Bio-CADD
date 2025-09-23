@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase/browser';
+import { supabase } from '@/integrations/supabase/client';
 
 export const getSiteSettings = async () => {
   try {
