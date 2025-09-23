@@ -73,6 +73,18 @@ export const useCertificates = () => {
   const getAllCertificates = async () => {
     try {
       setLoading(true);
+      
+      // Check if current user is admin before allowing access to all certificates
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session?.user?.id)
+        .single();
+
+      if (userProfile?.role !== 'admin') {
+        throw new Error('Unauthorized: Admin access required');
+      }
+
       const { data, error } = await supabase
         .from('certificates')
         .select(`
@@ -110,7 +122,7 @@ export const useCertificates = () => {
         .eq('certificate_number', certificateNumber)
         .eq('verification_hash', verificationHash)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
       if (error) {
         if (error.code === 'PGRST116') {
