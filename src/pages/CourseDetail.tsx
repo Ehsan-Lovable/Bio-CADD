@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { LoadingState } from '@/components/LoadingState';
 import { SEOHead } from '@/components/SEOHead';
 import { MarkdownViewer } from '@/components/MarkdownViewer';
+import { StudentResourcesList } from '@/components/StudentResourcesList';
 import { useAnalytics } from '@/lib/analytics';
 import { toast } from 'sonner';
 import { 
@@ -386,35 +387,63 @@ const CourseDetail = () => {
                 <Card className="p-6">
                   <h3 className="text-xl font-semibold mb-4">Course Content</h3>
                   <div className="space-y-3">
-                    {lessons.map((lesson, index) => (
-                      <div key={lesson.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-muted-foreground text-sm">
-                          {index + 1}
+                    {lessons.map((lesson, index) => {
+                      const canAccess = lesson.is_preview || isEnrolled;
+                      const handleLessonClick = () => {
+                        if (canAccess && lesson.video_url) {
+                          window.open(lesson.video_url, '_blank');
+                        }
+                      };
+
+                      return (
+                        <div 
+                          key={lesson.id} 
+                          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                            canAccess && lesson.video_url 
+                              ? 'hover:bg-muted/50 cursor-pointer' 
+                              : 'bg-muted/30'
+                          }`}
+                          onClick={handleLessonClick}
+                        >
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-muted-foreground text-sm">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">{lesson.title}</h4>
+                            {lesson.duration_minutes && (
+                              <p className="text-sm text-muted-foreground">
+                                {lesson.duration_minutes} minutes
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {lesson.is_preview || isEnrolled ? (
+                              <div className="flex items-center gap-1 text-primary">
+                                <Play className="h-4 w-4" />
+                                {lesson.is_preview && !isEnrolled && (
+                                  <span className="text-xs">Preview</span>
+                                )}
+                              </div>
+                            ) : (
+                              <Lock className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium">{lesson.title}</h4>
-                          {lesson.duration_minutes && (
-                            <p className="text-sm text-muted-foreground">
-                              {lesson.duration_minutes} minutes
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {lesson.is_preview || isEnrolled ? (
-                            <div className="flex items-center gap-1 text-primary">
-                              <Play className="h-4 w-4" />
-                              {lesson.is_preview && !isEnrolled && (
-                                <span className="text-xs">Preview</span>
-                              )}
-                            </div>
-                          ) : (
-                            <Lock className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </Card>
+              )}
+
+              {/* Resources for enrolled students */}
+              {isEnrolled && course && (
+                <div className="mt-6">
+                  <StudentResourcesList 
+                    courseId={course.id}
+                    courseTitle={course.title}
+                    showAll={true}
+                  />
+                </div>
               )}
             </div>
 

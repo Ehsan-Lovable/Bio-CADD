@@ -7,6 +7,8 @@ import { useOptimizedDashboardData } from '@/hooks/useOptimizedDashboardData';
 import { useAuth } from '@/hooks/useAuth';
 import { useCertificates } from '@/hooks/useCertificates';
 import { CertificateCard } from '@/components/CertificateCard';
+import { StudentLessonsList } from '@/components/StudentLessonsList';
+import { StudentResourcesList } from '@/components/StudentResourcesList';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   BookOpen, 
@@ -248,6 +250,31 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Course Content - Show lessons and resources for enrolled courses */}
+            {enrolledCourses && enrolledCourses.length > 0 && (
+              <div className="mt-8 space-y-6">
+                {enrolledCourses
+                  .filter(item => item.type === 'enrollment' || item.applicationStatus === 'approved')
+                  .slice(0, 2)
+                  .map((item) => (
+                    <div key={`content-${item.id}`} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <StudentLessonsList 
+                          courseId={item.courses?.id || ''} 
+                          courseTitle={item.courses?.title || 'Course'}
+                          maxItems={3}
+                        />
+                        <StudentResourcesList 
+                          courseId={item.courses?.id || ''} 
+                          courseTitle={item.courses?.title || 'Course'}
+                          maxItems={3}
+                        />
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
 
           {/* Certificates */}
