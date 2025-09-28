@@ -9,6 +9,7 @@ export interface Certificate {
   course_id?: string;
   batch_id?: string;
   certificate_number: string;
+  verification_code: string;
   verification_hash: string;
   qr_code_data?: string;
   status: 'active' | 'revoked';
@@ -106,7 +107,7 @@ export const useCertificates = () => {
     }
   };
 
-  const verifyCertificate = async (certificateNumber: string, verificationHash: string) => {
+  const verifyCertificate = async (verificationCode: string) => {
     try {
       setLoading(true);
       
@@ -119,8 +120,7 @@ export const useCertificates = () => {
           course_batches(batch_name, instructor_name),
           profiles!inner(full_name)
         `)
-        .eq('certificate_number', certificateNumber)
-        .eq('verification_hash', verificationHash)
+        .eq('verification_code', verificationCode.toUpperCase())
         .eq('status', 'active')
         .maybeSingle();
 
@@ -136,6 +136,7 @@ export const useCertificates = () => {
         .from('certificate_verifications')
         .insert({
           certificate_id: certificate.id,
+          verification_code: verificationCode.toUpperCase(),
           verifier_info: {
             user_agent: navigator.userAgent,
             timestamp: new Date().toISOString()
@@ -174,17 +175,24 @@ export const useCertificates = () => {
         return null;
       }
 
-      // Generate certificate using database function
-      const { data, error } = await supabase.rpc('generate_certificate_number');
-      if (error) throw error;
+      // Generate verification code using database function
+      const { data: verificationCode, error: codeError } = await supabase.rpc('generate_verification_code', {
+        course_id: courseId
+      });
+      if (codeError) throw codeError;
 
-      const certificateNumber = data;
-      
+      // Generate certificate number
+      const { data: certificateNumber, error: numberError } = await supabase.rpc('generate_certificate_number');
+      if (numberError) throw numberError;
+
       // Generate verification hash
       const verificationData = `${userId}-${courseId}-${Date.now()}`;
       const verificationHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verificationData));
       const hashArray = Array.from(new Uint8Array(verificationHash));
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      // Generate QR code data
+      const qrCodeData = `/verify?code=${verificationCode}`;
 
       const { data: certificate, error: insertError } = await supabase
         .from('certificates')
@@ -192,7 +200,9 @@ export const useCertificates = () => {
           user_id: userId,
           course_id: courseId,
           certificate_number: certificateNumber,
+          verification_code: verificationCode,
           verification_hash: hashHex,
+          qr_code_data: qrCodeData,
           issued_by: session.user.id,
           completed_at: new Date().toISOString(),
           metadata: {
@@ -210,7 +220,7 @@ export const useCertificates = () => {
 
       if (insertError) throw insertError;
 
-      toast.success('Certificate issued successfully');
+      toast.success(`Certificate issued successfully! Verification code: ${verificationCode}`);
       return certificate as any;
     } catch (error: any) {
       console.error('Error issuing certificate:', error);

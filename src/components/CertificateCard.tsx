@@ -2,8 +2,10 @@ import { Certificate } from '@/hooks/useCertificates';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, Eye, Share2, Award, Calendar, Hash } from 'lucide-react';
+import { Download, Eye, Share2, Award, Calendar, Hash, QrCode } from 'lucide-react';
 import { format } from 'date-fns';
+import { useState } from 'react';
+import { QRCodeGenerator } from './QRCodeGenerator';
 
 interface CertificateCardProps {
   certificate: Certificate;
@@ -11,6 +13,7 @@ interface CertificateCardProps {
   onView?: (certificate: Certificate) => void;
   onShare?: (certificate: Certificate) => void;
   showActions?: boolean;
+  showQRCode?: boolean;
 }
 
 export const CertificateCard = ({ 
@@ -18,8 +21,10 @@ export const CertificateCard = ({
   onDownload, 
   onView, 
   onShare,
-  showActions = true 
+  showActions = true,
+  showQRCode = false
 }: CertificateCardProps) => {
+  const [showQR, setShowQR] = useState(false);
   const issuedDate = format(new Date(certificate.issued_at), 'MMM dd, yyyy');
   const completedDate = certificate.completed_at ? format(new Date(certificate.completed_at), 'MMM dd, yyyy') : null;
 
@@ -82,13 +87,13 @@ export const CertificateCard = ({
             )}
           </div>
 
-          {/* Verification Hash */}
+          {/* Verification Code */}
           <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
             <Hash className="h-4 w-4 text-muted-foreground" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">Verification Hash</p>
+              <p className="text-xs text-muted-foreground">Verification Code</p>
               <p className="text-xs font-mono truncate">
-                {certificate.verification_hash}
+                {certificate.verification_code}
               </p>
             </div>
           </div>
@@ -107,34 +112,60 @@ export const CertificateCard = ({
 
           {/* Actions */}
           {showActions && certificate.status === 'active' && (
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onView?.(certificate)}
-                className="flex-1"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                View
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDownload?.(certificate)}
-                className="flex-1"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onShare?.(certificate)}
-                className="flex-1"
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onView?.(certificate)}
+                  className="flex-1"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  View
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onDownload?.(certificate)}
+                  className="flex-1"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Copy Code
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onShare?.(certificate)}
+                  className="flex-1"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </Button>
+              </div>
+              
+              {showQRCode && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowQR(!showQR)}
+                  className="w-full"
+                >
+                  <QrCode className="h-4 w-4 mr-2" />
+                  {showQR ? 'Hide' : 'Show'} QR Code
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* QR Code Section */}
+          {showQR && showQRCode && certificate.status === 'active' && (
+            <div className="pt-4 border-t">
+              <QRCodeGenerator
+                verificationCode={certificate.verification_code}
+                courseTitle={certificate.courses?.title}
+                studentName={certificate.profiles?.full_name}
+                className="border-0 shadow-none"
+              />
             </div>
           )}
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCertificates } from '@/hooks/useCertificates';
+import { toast } from 'sonner';
 import { CertificateCard } from '@/components/CertificateCard';
 import { EmptyState } from '@/components/EmptyState';
 import { LoadingState } from '@/components/LoadingState';
@@ -11,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Award, Search, Download, Eye, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function MyCertificates() {
   const { user } = useAuth();
@@ -43,7 +45,8 @@ export default function MyCertificates() {
     if (searchTerm) {
       filtered = filtered.filter(cert => 
         cert.courses?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cert.certificate_number?.toLowerCase().includes(searchTerm.toLowerCase())
+        cert.certificate_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cert.verification_code?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -56,21 +59,23 @@ export default function MyCertificates() {
   }, [certificates, searchTerm, statusFilter]);
 
   const handleDownload = (certificate: any) => {
-    downloadCertificate(certificate);
+    navigator.clipboard.writeText(certificate.verification_code);
+    toast.success('Verification code copied to clipboard');
   };
 
   const handleView = (certificate: any) => {
-    // For now, just download the certificate
-    downloadCertificate(certificate);
+    // Open verification page with the code
+    const verifyUrl = `${window.location.origin}/verify?code=${certificate.verification_code}`;
+    window.open(verifyUrl, '_blank');
   };
 
   const handleShare = (certificate: any) => {
     // Copy verification link to clipboard
-    const verifyUrl = `${window.location.origin}/certificate-verify`;
+    const verifyUrl = `${window.location.origin}/verify?code=${certificate.verification_code}`;
     navigator.clipboard.writeText(
-      `Verify my certificate: ${verifyUrl}\nCertificate Number: ${certificate.certificate_number}\nVerification Hash: ${certificate.verification_hash}`
+      `Verify my certificate: ${verifyUrl}\nVerification Code: ${certificate.verification_code}\nCourse: ${certificate.courses?.title}`
     );
-    // You could show a toast here
+    toast.success('Verification link copied to clipboard');
   };
 
   if (loading) {
@@ -116,7 +121,7 @@ export default function MyCertificates() {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search by course name or certificate number..."
+                      placeholder="Search by course name, certificate number, or verification code..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
@@ -173,6 +178,7 @@ export default function MyCertificates() {
                   onView={handleView}
                   onShare={handleShare}
                   showActions={true}
+                  showQRCode={true}
                 />
               ))}
             </div>

@@ -83,6 +83,13 @@ export default function AdminCertificates() {
       setSelectedUser('');
       setSelectedCourse('');
       fetchCertificates();
+      
+      // Show the generated verification code
+      if (result.verification_code) {
+        toast.success(`Certificate issued! Verification code: ${result.verification_code}`, {
+          duration: 10000,
+        });
+      }
     }
   };
 
@@ -96,6 +103,7 @@ export default function AdminCertificates() {
   const filteredCertificates = certificates.filter(cert => {
     const matchesSearch = !searchTerm || 
       cert.certificate_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cert.verification_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cert.courses?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cert.profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -105,6 +113,27 @@ export default function AdminCertificates() {
   });
 
   const columns = [
+    {
+      key: 'verification_code',
+      accessorKey: 'verification_code',
+      header: 'Verification Code',
+      cell: ({ row }: any) => (
+        <div className="space-y-1">
+          <div 
+            className="font-mono text-sm bg-primary/10 text-primary px-2 py-1 rounded border cursor-pointer hover:bg-primary/20 transition-colors"
+            onClick={() => {
+              navigator.clipboard.writeText(row.getValue('verification_code'));
+              toast.success('Verification code copied to clipboard');
+            }}
+          >
+            {row.getValue('verification_code')}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Click to copy
+          </div>
+        </div>
+      ),
+    },
     {
       key: 'certificate_number',
       accessorKey: 'certificate_number',
@@ -276,7 +305,7 @@ export default function AdminCertificates() {
               <Label htmlFor="search">Search</Label>
               <Input
                 id="search"
-                placeholder="Search by certificate #, course, or student name..."
+                placeholder="Search by verification code, certificate #, course, or student name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

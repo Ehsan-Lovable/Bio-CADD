@@ -7,6 +7,7 @@ import { useOptimizedDashboardData } from '@/hooks/useOptimizedDashboardData';
 import { useAuth } from '@/hooks/useAuth';
 import { useCertificates } from '@/hooks/useCertificates';
 import { CertificateCard } from '@/components/CertificateCard';
+import { toast } from 'sonner';
 import { ExpandableCourseCard } from '@/components/ExpandableCourseCard';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -196,7 +197,21 @@ export default function Dashboard() {
                       <CertificateCard
                         key={certificate.id}
                         certificate={certificate}
-                        onDownload={downloadCertificate}
+                        onDownload={(cert) => {
+                          navigator.clipboard.writeText(cert.verification_code);
+                          toast.success('Verification code copied to clipboard');
+                        }}
+                        onView={(cert) => {
+                          const verifyUrl = `${window.location.origin}/verify?code=${cert.verification_code}`;
+                          window.open(verifyUrl, '_blank');
+                        }}
+                        onShare={(cert) => {
+                          const verifyUrl = `${window.location.origin}/verify?code=${cert.verification_code}`;
+                          navigator.clipboard.writeText(
+                            `Verify my certificate: ${verifyUrl}\nVerification Code: ${cert.verification_code}`
+                          );
+                          toast.success('Verification link copied to clipboard');
+                        }}
                         showActions={true}
                       />
                     ))}
