@@ -162,6 +162,26 @@ export const useCertificates = () => {
     try {
       setLoading(true);
 
+      // Ensure the user is enrolled in the course before issuing a certificate
+      const { data: enrollment, error: enrollmentError } = await supabase
+        .from('enrollments')
+        .select('id, status')
+        .eq('user_id', userId)
+        .eq('course_id', courseId)
+        .maybeSingle();
+
+      if (enrollmentError) throw enrollmentError;
+      if (!enrollment) {
+        toast.error('Cannot issue certificate: user is not enrolled in this course');
+        return null;
+      }
+
+      // Enforce completion before issuance
+      if ((enrollment as any).status !== 'completed') {
+        toast.error('Cannot issue certificate: enrollment is not marked as completed');
+        return null;
+      }
+
       // Check if certificate already exists
       const { data: existing } = await supabase
         .from('certificates')
@@ -262,6 +282,31 @@ export const useCertificates = () => {
     }
   };
 
+  const regenerateVerificationCode = async (certificateId: string, courseId: string) => {
+    try {
+      setLoading(true);
+      const { data: verificationCode, error: codeError } = await supabase.rpc('generate_verification_code', {
+        course_id: courseId
+      });
+      if (codeError) throw codeError;
+
+      const { error: updateError } = await supabase
+        .from('certificates')
+        .update({ verification_code: verificationCode })
+        .eq('id', certificateId);
+      if (updateError) throw updateError;
+
+      toast.success('Verification code regenerated');
+      return verificationCode as string;
+    } catch (error: any) {
+      console.error('Error regenerating code:', error);
+      toast.error(error.message || 'Failed to regenerate code');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const downloadCertificate = async (certificate: Certificate) => {
     try {
       setLoading(true);
@@ -297,6 +342,7 @@ export const useCertificates = () => {
     verifyCertificate,
     issueCertificate,
     revokeCertificate,
-    downloadCertificate
+    downloadCertificate,
+    regenerateVerificationCode
   };
 };

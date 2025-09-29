@@ -35,20 +35,45 @@ export default function AdminCertificates() {
   const [showIssueDialog, setShowIssueDialog] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [enrolledUsers, setEnrolledUsers] = useState<any[]>([]);
   const [selectedCourse, setSelectedCourse] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
+  const [selectedCourseFilter, setSelectedCourseFilter] = useState('');
 
   const { 
     getAllCertificates, 
     issueCertificate, 
     revokeCertificate, 
-    downloadCertificate 
+    downloadCertificate,
+    regenerateVerificationCode
   } = useCertificates();
 
   useEffect(() => {
     fetchCertificates();
     fetchCoursesAndUsers();
   }, []);
+
+  // When course changes, load enrolled users for that course
+  useEffect(() => {
+    const fetchEnrolled = async () => {
+      if (!selectedCourse) {
+        setEnrolledUsers([]);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('enrollments')
+        .select('user_id, status, profiles:profiles(id, full_name)')
+        .eq('course_id', selectedCourse);
+      if (!error && data) {
+        // Prefer completed first, then others
+        const mapped = data
+          .map((e: any) => ({ id: e.profiles?.id, full_name: e.profiles?.full_name, status: e.status }))
+          .filter((u: any) => !!u.id && !!u.full_name);
+        setEnrolledUsers(mapped);
+      }
+    };
+    fetchEnrolled();
+  }, [selectedCourse]);
 
   const fetchCertificates = async () => {
     setLoading(true);
@@ -108,8 +133,9 @@ export default function AdminCertificates() {
       cert.profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = selectedStatus === 'all' || cert.status === selectedStatus;
+    const matchesCourse = !selectedCourseFilter || cert.course_id === selectedCourseFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesCourse;
   });
 
   const columns = [
@@ -200,6 +226,19 @@ export default function AdminCertificates() {
             >
               <Download className="h-4 w-4" />
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const newCode = await regenerateVerificationCode(certificate.id, certificate.course_id);
+                if (newCode) {
+                  navigator.clipboard.writeText(newCode);
+                  toast.success(`New code copied: ${newCode}`);
+                }
+              }}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
             {certificate.status === 'active' && (
               <Button 
                 variant="outline" 
@@ -259,10 +298,10 @@ export default function AdminCertificates() {
                 <Label htmlFor="user">Student</Label>
                 <Select value={selectedUser} onValueChange={setSelectedUser}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a student" />
+                    <SelectValue placeholder={selectedCourse ? "Select an enrolled student" : "Select a course first"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {users.map((user) => (
+                    {(selectedCourse ? enrolledUsers : users).map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.full_name}
                       </SelectItem>
@@ -300,7 +339,7 @@ export default function AdminCertificates() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="search">Search</Label>
               <Input
@@ -320,6 +359,22 @@ export default function AdminCertificates() {
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="revoked">Revoked</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="course-filter">Course</Label>
+              <Select value={selectedCourseFilter} onValueChange={setSelectedCourseFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All courses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Courses</SelectItem>
+                  {courses.map((course) => (
+                    <SelectItem key={course.id} value={course.id}>
+                      {course.title}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

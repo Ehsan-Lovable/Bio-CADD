@@ -189,6 +189,7 @@ export type Database = {
           verified_at: string
           verifier_info: Json | null
           verifier_ip: string | null
+          verification_code?: string | null
         }
         Insert: {
           certificate_id: string
@@ -197,6 +198,7 @@ export type Database = {
           verified_at?: string
           verifier_info?: Json | null
           verifier_ip?: string | null
+          verification_code?: string | null
         }
         Update: {
           certificate_id?: string
@@ -205,6 +207,7 @@ export type Database = {
           verified_at?: string
           verifier_info?: Json | null
           verifier_ip?: string | null
+          verification_code?: string | null
         }
         Relationships: []
       }
@@ -228,6 +231,7 @@ export type Database = {
           updated_at: string
           user_id: string
           verification_hash: string
+          verification_code?: string | null
         }
         Insert: {
           batch_id?: string | null
@@ -248,6 +252,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           verification_hash: string
+          verification_code?: string | null
         }
         Update: {
           batch_id?: string | null
@@ -268,6 +273,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           verification_hash?: string
+          verification_code?: string | null
         }
         Relationships: [
           {
@@ -1024,6 +1030,10 @@ export type Database = {
       }
       generate_certificate_number: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_verification_code: {
+        Args: { course_id: string }
         Returns: string
       }
       generate_verification_hash: {

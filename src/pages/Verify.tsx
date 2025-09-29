@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,9 +20,11 @@ import {
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useSearchParams } from 'react-router-dom';
 
 interface VerificationResult {
   id: string;
+  certificate_number?: string;
   verification_code: string;
   courses?: {
     title: string;
@@ -41,10 +43,28 @@ interface VerificationResult {
 }
 
 export default function Verify() {
+  const [searchParams] = useSearchParams();
   const [verificationCode, setVerificationCode] = useState('');
+  const [certificateNumber, setCertificateNumber] = useState('');
   const [verifiedCertificate, setVerifiedCertificate] = useState<VerificationResult | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verified' | 'invalid'>('idle');
   const [loading, setLoading] = useState(false);
+  const [lastAttemptAt, setLastAttemptAt] = useState<number>(0);
+
+  // Prefill from query params on first load
+  useEffect(() => {
+    const codeParam = searchParams.get('code');
+    const numberParam = searchParams.get('number');
+    if (codeParam) setVerificationCode(codeParam.toUpperCase());
+    if (numberParam) setCertificateNumber(numberParam.toUpperCase());
+    // Auto-verify if code exists in URL
+    if (codeParam) {
+      // delay slightly to ensure state updates
+      setTimeout(() => {
+        handleVerify();
+      }, 0);
+    }
+  }, [searchParams]);
 
   const handleVerify = async () => {
     if (!verificationCode.trim()) {
@@ -52,9 +72,18 @@ export default function Verify() {
       return;
     }
 
+    // Basic client-side throttle: 1 attempt per 2 seconds
+    const now = Date.now();
+    if (now - lastAttemptAt < 2000) {
+      toast.info('Please wait a moment before trying again');
+      return;
+    }
+    setLastAttemptAt(now);
+
     setLoading(true);
     try {
-      const { data: certificate, error } = await supabase
+      // Build base query
+      let query = supabase
         .from('certificates')
         .select(`
           *,
@@ -62,9 +91,15 @@ export default function Verify() {
           course_batches(batch_name, instructor_name),
           profiles!inner(full_name)
         `)
-        .eq('verification_code', verificationCode.trim().toUpperCase())
         .eq('status', 'active')
-        .maybeSingle();
+        .eq('verification_code', verificationCode.trim().toUpperCase());
+
+      // If a certificate number was provided, require it to match as well
+      if (certificateNumber.trim()) {
+        query = query.eq('certificate_number', certificateNumber.trim().toUpperCase());
+      }
+
+      const { data: certificate, error } = await query.maybeSingle();
 
       if (error) {
         console.error('Verification error:', error);
@@ -102,12 +137,16 @@ export default function Verify() {
 
   const handleReset = () => {
     setVerificationCode('');
+    setCertificateNumber('');
     setVerifiedCertificate(null);
     setVerificationStatus('idle');
   };
 
   const copyVerificationUrl = () => {
-    const url = `${window.location.origin}/verify?code=${verificationCode}`;
+    const params = new URLSearchParams();
+    if (verificationCode) params.set('code', verificationCode);
+    if (certificateNumber) params.set('number', certificateNumber);
+    const url = `${window.location.origin}/verify?${params.toString()}`;
     navigator.clipboard.writeText(url);
     toast.success('Verification URL copied to clipboard');
   };
@@ -148,6 +187,17 @@ export default function Verify() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="certificate-number">Certificate Number (optional)</Label>
+                  <Input
+                    id="certificate-number"
+                    placeholder="e.g., CERT-2025-000123"
+                    value={certificateNumber}
+                    onChange={(e) => setCertificateNumber(e.target.value.toUpperCase())}
+                    disabled={loading}
+                    className="font-mono"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="verification-code">Verification Code</Label>
                   <div className="flex gap-2">
@@ -201,6 +251,11 @@ export default function Verify() {
                         <p className="text-sm text-muted-foreground">
                           Verification Code: {verifiedCertificate.verification_code}
                         </p>
+                        {verifiedCertificate.certificate_number && (
+                          <p className="text-sm text-muted-foreground">
+                            Certificate #: {verifiedCertificate.certificate_number}
+                          </p>
+                        )}
                       </div>
                     </div>
 
