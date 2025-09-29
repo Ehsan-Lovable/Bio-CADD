@@ -7,24 +7,25 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ScrollToTop } from "@/components/ScrollToTop";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Admin from "./pages/Admin";
-import NotFound from "./pages/NotFound";
-import Courses from "./pages/Courses";
-import CourseDetail from "./pages/CourseDetail";
-import { PortfolioList } from "./pages/PortfolioList";
-import PortfolioDetail from "./pages/PortfolioDetail";
-import Blog from "./pages/Blog";
-import Contact from "./pages/Contact";
-import Career from "./pages/Career";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import CertificateVerify from "./pages/CertificateVerify";
-import Verify from "./pages/Verify";
-import MyCertificates from "./pages/MyCertificates";
-import CertificateVerifyPublic from "./pages/CertificateVerifyPublic";
+import { lazy, Suspense } from "react";
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Admin = lazy(() => import("./pages/Admin"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Courses = lazy(() => import("./pages/Courses"));
+const CourseDetail = lazy(() => import("./pages/CourseDetail"));
+const PortfolioList = lazy(() => import("./pages/PortfolioList").then(m => ({ default: m.PortfolioList })));
+const PortfolioDetail = lazy(() => import("./pages/PortfolioDetail"));
+const Blog = lazy(() => import("./pages/Blog"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Career = lazy(() => import("./pages/Career"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const CertificateVerify = lazy(() => import("./pages/CertificateVerify"));
+const Verify = lazy(() => import("./pages/Verify"));
+const MyCertificates = lazy(() => import("./pages/MyCertificates"));
+const CertificateVerifyPublic = lazy(() => import("./pages/CertificateVerifyPublic"));
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <ScrollToTop />
+          <Suspense fallback={<div className="p-6 text-center text-muted-foreground">Loading...</div>}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -79,6 +81,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </AuthProvider>
     </ErrorBoundary>

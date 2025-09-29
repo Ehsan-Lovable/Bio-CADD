@@ -24,8 +24,7 @@ export function MainNav({ className, scrolled = false }: MainNavProps) {
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Debug logging
-  console.log('MainNav render:', { isMobile, location: location.pathname, scrolled });
+  // Debug logging removed for performance
 
   // Close mobile menu on route change
   useEffect(() => {
