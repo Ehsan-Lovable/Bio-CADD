@@ -11,6 +11,7 @@ const navLinks = [
   { name: 'Courses', path: '/courses', title: 'Browse available courses' },
   { name: 'Portfolio', path: '/portfolio', title: 'View project portfolio' },
   { name: 'Contact', path: '/contact', title: 'Get in touch' },
+  { name: 'Verify Certificate', path: '/certificate-verify', title: 'Verify a certificate' },
 ];
 
 interface MainNavProps {
